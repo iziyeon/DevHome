@@ -1,6 +1,6 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
 import PostCard from "./PostCard";
-import { communityDummyPosts } from "../../../data/CommunityDummyPosts";
+import { communityDummyPosts } from "../../../data/communityDummyPosts";
 
 const POSTS_PER_PAGE = 6;
 
