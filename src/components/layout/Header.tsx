@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/layout/logo.png";
 
-const isLoggedIn = true; // TODO: 실제 로그인 상태 연동
+const isLoggedIn = true;
 
 const navLinks = [
   { to: "/community", label: "Community", always: true },

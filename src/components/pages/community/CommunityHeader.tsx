@@ -37,7 +37,7 @@ export default function CommunityHeader({
           aria-label="카테고리 필터 열기"
         >
           <PanelRight size={18} />
-          <span className="ml-1">필터</span>
+          <span className="ml-1"></span>
         </button>
       </div>
     </div>
