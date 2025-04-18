@@ -1,7 +1,9 @@
+import CommunityPostGrid from "../components/pages/community/CommunityPostGrid";
+
 export default function Community() {
   return (
-    <div className="flex items-center justify-center h-screen text-2xl font-bold">
-      Community Page
+    <div className="max-w-7xl mx-auto px-4 py-10">
+      <CommunityPostGrid />
     </div>
   );
 }
