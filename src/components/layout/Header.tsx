@@ -2,12 +2,17 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/layout/logo.png";
 
-const isLoggedIn = true; // TODO: 실제 로그인 상태 연동
+const isLoggedIn = true; // TODO: Firebase Auth로 연동 예정
+const username = "hong"; // TODO: auth.currentUser.displayName으로 대체 예정
 
 const navLinks = [
-  { to: "/community", label: "Community", always: true },
-  { to: "/resume", label: "Resume", authOnly: true },
-  { to: "/mypage", label: "Mypage", authOnly: true },
+  { to: () => "/community", label: "Community", always: true },
+  { to: () => "/resume", label: "Resume", authOnly: true },
+  {
+    to: (username?: string) => (username ? `/mypage/${username}` : "/mypage"),
+    label: "Mypage",
+    authOnly: true,
+  },
 ];
 
 export default function Header() {
@@ -20,14 +25,15 @@ export default function Header() {
   const renderNavLinks = (isMobile = false) =>
     navLinks.map(({ to, label, always, authOnly }) => {
       if (always || (authOnly && isLoggedIn)) {
+        const path = to(username);
         return (
           <Link
-            key={to}
-            to={to}
+            key={label}
+            to={path}
             onClick={isMobile ? () => setIsMenuOpen(false) : undefined}
             className={`btn btn-ghost ${
               isMobile ? "text-left justify-start" : "text-base"
-            } hover:underline ${isCurrent(to)}`}
+            } hover:underline ${isCurrent(path)}`}
           >
             {label}
           </Link>
