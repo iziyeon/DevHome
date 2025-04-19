@@ -1,8 +1,10 @@
-import { useState } from "react";
+// src/components/pages/write/PostWriteForm.tsx
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { communityDummyPosts } from "../../../data/communityDummyPosts";
 
 const categoryOptions = [
   "기능구현팁",
-  "UI디자인",
   "라이브러리추천",
   "프로젝트공유",
   "포트폴리오공유",
@@ -12,20 +14,44 @@ const categoryOptions = [
 ];
 
 export default function PostWriteForm() {
+  const [searchParams] = useSearchParams();
+  const postId = searchParams.get("id");
+  const isEditMode = Boolean(postId);
+
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [content, setContent] = useState("");
 
+  // ✅ 수정 모드일 때 기존 글 데이터 불러오기
+  useEffect(() => {
+    if (!isEditMode) return;
+
+    const existingPost = communityDummyPosts.find((p) => p.id === postId);
+    if (existingPost) {
+      setTitle(existingPost.title);
+      setCategory(existingPost.category);
+      setContent(existingPost.content);
+    }
+  }, [isEditMode, postId]);
+
+  // ✅ 제출 처리
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log("📝 새 글 작성됨:", {
+    const formData = {
+      id: postId,
       title,
       category,
       content,
-    });
+    };
 
-    // TODO: Firestore 저장 로직
+    if (isEditMode) {
+      console.log("🛠 수정된 글:", formData);
+    } else {
+      console.log("📝 새 글 작성됨:", formData);
+    }
+
+    // TODO: Firestore 저장 또는 업데이트 로직
   };
 
   return (
@@ -78,7 +104,7 @@ export default function PostWriteForm() {
       {/* 제출 */}
       <div className="flex justify-end">
         <button type="submit" className="btn btn-primary">
-          작성 완료
+          {isEditMode ? "수정 완료" : "작성 완료"}
         </button>
       </div>
     </form>
