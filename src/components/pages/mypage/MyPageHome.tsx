@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { PenLine } from "lucide-react";
+import MyIntroBanner from "./MyIntroBanner";
 
 export default function MyPageHome() {
   return (
@@ -15,9 +16,11 @@ export default function MyPageHome() {
         </Link>
       </div>
 
-      <div className="rounded-xl border border-white/10 bg-white/5 px-6 py-5 text-center text-white text-sm">
-        인트로 배너 자리
-      </div>
+      <MyIntroBanner
+        interest="취업"
+        book="모던 자바스크립트 Deep Dive"
+        goal="한 줄 커밋이라도 하기"
+      />
 
       <div className="rounded-xl border border-white/10 bg-white/5 px-6 py-5 text-center text-white text-sm">
         최신 글 리스트 자리
