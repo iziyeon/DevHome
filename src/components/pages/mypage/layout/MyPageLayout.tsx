@@ -1,4 +1,5 @@
 import { Outlet, useParams } from "react-router-dom";
+import MyProfileSidebar from "./MyProfileSidebar";
 
 export default function MyPageLayout() {
   const { username } = useParams<{ username: string }>();
@@ -13,11 +14,7 @@ export default function MyPageLayout() {
 
   return (
     <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 py-14 text-white animate-fade-in md:grid-cols-[260px_1fr]">
-      <aside className="bg-white/5 border border-white/10 rounded-xl p-4 text-center text-white">
-        사이드바 자리
-      </aside>
-
-      {/* 오른쪽 콘텐츠 영역 */}
+      <MyProfileSidebar username={username} />
       <div className="space-y-8">
         <Outlet />
       </div>
