@@ -8,6 +8,7 @@ import MyPageLayout from "../components/pages/mypage/layout/MyPageLayout";
 import MyPageHome from "../components/pages/mypage/MyPageHome";
 import PostCategoryPage from "../components/pages/mypage/PostCategoryPage";
 import MyPagePostDetail from "../components/pages/mypage/MyPagePostDetail";
+import MyPagePostWrite from "../components/pages/mypage/MyPagePostWrite";
 
 export default function Router() {
   return (
@@ -23,6 +24,7 @@ export default function Router() {
               element={<PostCategoryPage />}
             />
             <Route path="post/:id" element={<MyPagePostDetail />} />
+            <Route path="write" element={<MyPagePostWrite />} />
           </Route>
         </Route>
       </Routes>
