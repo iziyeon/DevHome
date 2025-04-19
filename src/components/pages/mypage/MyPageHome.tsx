@@ -1,12 +1,15 @@
-import { Link } from "react-router-dom";
-import { PenLine } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { PenLine, FileText, FolderOpen } from "lucide-react";
 
 import MyIntroBanner from "./MyIntroBanner";
 import MyPostList from "./MyPostList";
 import MyGuestbookList from "./MyGuestbookList";
+import MyQuickLinksPanel from "./MyQuickLinksPanel";
 import { myPageDummyPosts } from "../../../data/MyPageDummyPosts";
 
 export default function MyPageHome() {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-10">
       <div className="flex items-center justify-between">
@@ -37,9 +40,20 @@ export default function MyPageHome() {
 
       <MyGuestbookList username="yeon" />
 
-      <div className="rounded-xl border border-white/10 bg-white/5 px-6 py-5 text-center text-white text-sm">
-        바로가기 패널 자리
-      </div>
+      <MyQuickLinksPanel
+        links={[
+          {
+            label: "이력서 보기",
+            icon: FileText,
+            onClick: () => navigate("/resume"),
+          },
+          {
+            label: "내 프로젝트 보기",
+            icon: FolderOpen,
+            onClick: () => navigate("/projects"),
+          },
+        ]}
+      />
     </div>
   );
 }
