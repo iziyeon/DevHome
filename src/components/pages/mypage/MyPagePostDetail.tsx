@@ -2,7 +2,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { PenLine, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { myPageDummyPosts } from "../../../data/MyPageDummyPosts";
-import { myPageCommentDummy, Comment } from "../../../data/myPageCommentDummy";
+import {
+  myPageCommentDummy,
+  Comment as MyPageComment,
+} from "../../../data/myPageCommentDummy"; // ✅ alias 적용
 
 export default function MyPagePostDetail() {
   const { id, username } = useParams<{ id: string; username: string }>();
@@ -13,7 +16,7 @@ export default function MyPagePostDetail() {
   const initialComments =
     id && myPageCommentDummy[id] ? myPageCommentDummy[id] : [];
 
-  const [localComments, setLocalComments] = useState<Comment[]>([]);
+  const [localComments, setLocalComments] = useState<MyPageComment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
@@ -34,7 +37,7 @@ export default function MyPagePostDetail() {
     e.preventDefault();
     if (!commentText.trim()) return;
 
-    const newComment: Comment = {
+    const newComment: MyPageComment = {
       id: Math.random().toString(36).slice(2, 9),
       author: currentUserNickname,
       content: commentText,
