@@ -6,6 +6,7 @@ import Community from "../pages/Community";
 
 import MyPageLayout from "../components/pages/mypage/layout/MyPageLayout";
 import MyPageHome from "../components/pages/mypage/MyPageHome";
+import PostCategoryPage from "../components/pages/mypage/PostCategoryPage";
 
 export default function Router() {
   return (
@@ -16,6 +17,10 @@ export default function Router() {
           <Route path="/community" element={<Community />} />
           <Route path="/mypage/:username" element={<MyPageLayout />}>
             <Route index element={<MyPageHome />} />
+            <Route
+              path="category/:categoryKey"
+              element={<PostCategoryPage />}
+            />
           </Route>
         </Route>
       </Routes>
