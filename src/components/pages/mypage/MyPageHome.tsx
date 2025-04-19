@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
 import { PenLine } from "lucide-react";
+
 import MyIntroBanner from "./MyIntroBanner";
+import MyPostList from "./MyPostList";
+import { myPageDummyPosts } from "../../../../src/data/MyPageDummyPosts";
 
 export default function MyPageHome() {
   return (
@@ -17,14 +20,19 @@ export default function MyPageHome() {
       </div>
 
       <MyIntroBanner
-        interest="취업"
-        book="모던 자바스크립트 Deep Dive"
+        interest="웹 애니메이션"
+        book="개발자 글쓰기"
         goal="한 줄 커밋이라도 하기"
       />
 
-      <div className="rounded-xl border border-white/10 bg-white/5 px-6 py-5 text-center text-white text-sm">
-        최신 글 리스트 자리
-      </div>
+      <MyPostList
+        posts={myPageDummyPosts
+          .slice()
+          .sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
+          .slice(0, 5)}
+      />
 
       <div className="rounded-xl border border-white/10 bg-white/5 px-6 py-5 text-center text-white text-sm">
         방명록 리스트 자리

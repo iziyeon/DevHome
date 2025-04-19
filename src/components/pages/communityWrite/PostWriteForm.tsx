@@ -1,7 +1,7 @@
 // src/components/pages/write/PostWriteForm.tsx
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { communityDummyPosts } from "../../../data/communityDummyPosts";
+import { communityDummyPosts } from "../../../data/CommunityDummyPosts";
 
 const categoryOptions = [
   "기능구현팁",

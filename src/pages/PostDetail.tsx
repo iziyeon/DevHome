@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { PenLine, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 
-import { communityDummyPosts } from "../data/communityDummyPosts";
+import { communityDummyPosts } from "../data/CommunityDummyPosts";
 import { commentDummy, Comment } from "../data/commentDummy";
 
 export default function PostDetail() {
