@@ -9,6 +9,7 @@ import MyPageHome from "../components/pages/mypage/MyPageHome";
 import PostCategoryPage from "../components/pages/mypage/PostCategoryPage";
 import MyPagePostDetail from "../components/pages/mypage/MyPagePostDetail";
 import MyPagePostWrite from "../components/pages/mypage/MyPagePostWrite";
+import MyPageGuestbook from "../components/pages/mypage/MyPageGuestbook";
 
 export default function Router() {
   return (
@@ -25,6 +26,7 @@ export default function Router() {
             />
             <Route path="post/:id" element={<MyPagePostDetail />} />
             <Route path="write" element={<MyPagePostWrite />} />
+            <Route path="guestbook" element={<MyPageGuestbook />} />{" "}
           </Route>
         </Route>
       </Routes>
