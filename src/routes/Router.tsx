@@ -10,7 +10,8 @@ import PostCategoryPage from "../components/pages/mypage/PostCategoryPage";
 import MyPagePostDetail from "../components/pages/mypage/MyPagePostDetail";
 import MyPagePostWrite from "../components/pages/mypage/MyPagePostWrite";
 import MyPageGuestbook from "../components/pages/mypage/MyPageGuestbook";
-import MyPageQuickLinks from "../components/pages/mypage/MyPageQuickLinks"; // ✅ 추가 누락 방지
+import MyPageQuickLinks from "../components/pages/mypage/MyPageQuickLinks";
+import MyPageSearchResult from "../components/pages/mypage/MyPageSearchResult";
 
 export default function Router() {
   return (
@@ -21,6 +22,7 @@ export default function Router() {
           <Route path="/community" element={<Community />} />
           <Route path="/mypage/:username" element={<MyPageLayout />}>
             <Route index element={<MyPageHome />} />
+            <Route path="search" element={<MyPageSearchResult />} />
             <Route
               path="category/:categoryKey"
               element={<PostCategoryPage />}

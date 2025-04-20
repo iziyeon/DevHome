@@ -3,7 +3,6 @@ import { useState } from "react";
 import MyProfileSidebar from "./MyProfileSidebar";
 import type { QuickLink } from "../MyQuickLinksPanel";
 
-// 초기 링크 정보 상수로 분리
 const DEFAULT_QUICK_LINKS: QuickLink[] = [
   {
     id: "l1",
