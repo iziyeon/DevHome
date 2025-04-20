@@ -1,5 +1,3 @@
-// src/components/pages/community/CommunityPostGrid.tsx
-
 import { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import {
@@ -26,6 +24,14 @@ export default function CommunityPostGrid() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);
+
+  const handlePrev = () => {
+    if (currentPage > 1) setCurrentPage((p) => p - 1);
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) setCurrentPage((p) => p + 1);
+  };
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-10 text-white animate-fade-in space-y-8">
@@ -59,20 +65,24 @@ export default function CommunityPostGrid() {
       )}
 
       {totalPages > 1 && (
-        <div className="flex justify-center mt-8 gap-1 sm:gap-2 flex-wrap">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`btn btn-sm ${
-                currentPage === i + 1
-                  ? "btn-primary text-white"
-                  : "btn-outline border-white/20 text-white hover:border-indigo-300 hover:text-indigo-300"
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
+        <div className="flex justify-center gap-2 pt-6">
+          <button
+            onClick={handlePrev}
+            disabled={currentPage === 1}
+            className="btn btn-sm btn-outline text-white border-white/20 disabled:opacity-40"
+          >
+            이전
+          </button>
+          <span className="text-sm text-gray-300 pt-[7px]">
+            {currentPage} / {totalPages}
+          </span>
+          <button
+            onClick={handleNext}
+            disabled={currentPage === totalPages}
+            className="btn btn-sm btn-outline text-white border-white/20 disabled:opacity-40"
+          >
+            다음
+          </button>
         </div>
       )}
     </div>
