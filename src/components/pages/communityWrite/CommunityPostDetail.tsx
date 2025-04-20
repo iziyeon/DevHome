@@ -1,53 +1,50 @@
-import { useParams, useNavigate } from "react-router-dom";
+// src/components/pages/community/CommunityPostDetail.tsx
+import { useNavigate, useParams } from "react-router-dom";
 import { PenLine, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { communityDummyPosts } from "../../../data/CommunityDummyPosts";
+import {
+  commentDummy,
+  Comment as CommunityComment,
+} from "../../../data/commentDummy";
 
-import { communityDummyPosts } from "../data/CommunityDummyPosts";
-import { commentDummy, Comment } from "../data/commentDummy";
-
-export default function PostDetail() {
-  const { id } = useParams();
+export default function CommunityPostDetail() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
   const currentUserNickname = "yeon";
-
   const post = communityDummyPosts.find((p) => p.id === id);
+  const initialComments = id && commentDummy[id] ? commentDummy[id] : [];
 
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [localComments, setLocalComments] = useState<CommunityComment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
 
   useEffect(() => {
-    console.log("🟡 현재 게시글 ID:", id);
-
-    if (!id) {
-      console.warn("⚠️ postId가 없습니다.");
-      setComments([]);
-      return;
-    }
-
-    const data = commentDummy[id];
-    if (data) {
-      setComments(data);
-      console.log("✅ 댓글 불러오기 성공:", data);
-    } else {
-      setComments([]);
-      console.warn("❌ 댓글 없음:", id);
-    }
+    setLocalComments(initialComments);
   }, [id]);
+
+  const handleDeletePost = () => {
+    const confirmed = confirm("정말로 삭제하시겠습니까?");
+    if (confirmed && post) {
+      console.log(`🗑 글 삭제됨: ${post.id}`);
+      navigate("/community");
+    }
+  };
 
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!commentText.trim()) return;
 
-    const newComment: Comment = {
+    const newComment: CommunityComment = {
       id: Math.random().toString(36).slice(2, 9),
       author: currentUserNickname,
       content: commentText,
       date: new Date().toISOString().slice(0, 10),
     };
 
-    setComments((prev) => [...prev, newComment]);
+    setLocalComments((prev) => [...prev, newComment]);
     setCommentText("");
   };
 
@@ -60,68 +57,54 @@ export default function PostDetail() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
-      {/* 카테고리 */}
+    <div className="w-full max-w-3xl mx-auto px-4 py-10 text-white">
       <span className="badge badge-outline text-indigo-300 border-indigo-300 mb-4">
         #{post.category}
       </span>
 
-      {/* 제목 */}
-      <h1 className="text-3xl font-bold text-white mb-3">{post.title}</h1>
+      <h1 className="text-3xl font-bold mb-3">{post.title}</h1>
 
-      {/* 작성자 정보 */}
       <div className="text-sm text-gray-400 mb-8">
-        by {post.author} · {post.date} · {post.readTime}
+        {post.author} · {post.date} · {post.readTime}
       </div>
 
-      {/* 본문 */}
-      <div className="prose prose-invert text-white whitespace-pre-wrap">
-        {post.content}
+      <div className="prose prose-invert whitespace-pre-wrap">
+        {post.content || "내용이 없습니다."}
       </div>
 
-      {/* 수정/삭제 버튼 */}
-      <div className="flex gap-2 justify-end mt-8">
+      <div className="flex flex-wrap gap-2 justify-end mt-8">
         <button
-          onClick={() => navigate(`/write?id=${post.id}`)}
-          className="btn btn-sm btn-outline text-white border-gray-500 hover:border-white flex items-center gap-1"
+          onClick={() => navigate(`/community/write?id=${post.id}`)}
+          className="btn btn-outline btn-sm border-white/20 text-white hover:border-indigo-300 hover:text-indigo-300 transition inline-flex items-center gap-1"
         >
           <PenLine size={16} />
           수정
         </button>
         <button
-          onClick={() => {
-            const confirmDelete = confirm("정말로 삭제하시겠습니까?");
-            if (confirmDelete) {
-              console.log(`게시글 ${post.id} 삭제됨`);
-              navigate("/community");
-            }
-          }}
-          className="btn btn-sm btn-error text-white flex items-center gap-1"
+          onClick={handleDeletePost}
+          className="btn btn-outline btn-sm border-white/20 text-white hover:border-red-400 hover:text-red-400 transition inline-flex items-center gap-1"
         >
           <Trash2 size={16} />
           삭제
         </button>
       </div>
 
-      {/* 뒤로가기 */}
       <div className="mt-10">
         <button
           onClick={() => navigate(-1)}
-          className="btn btn-outline text-white border-gray-500 hover:border-white"
+          className="btn btn-outline btn-sm border-white/20 text-white hover:border-indigo-300 hover:text-indigo-300 transition"
         >
           ← 뒤로가기
         </button>
       </div>
 
-      {/* 💬 댓글 영역 */}
       <div className="mt-16 space-y-6 animate-fade-in">
         <h2 className="text-xl font-bold text-white">
-          💬 댓글 {comments.length}개
+          💬 댓글 {localComments.length}개
         </h2>
 
-        {/* 댓글 목록 */}
         <div className="space-y-4">
-          {comments.map((comment, index) => (
+          {localComments.map((comment, index) => (
             <div
               key={comment.id}
               className="p-4 rounded-lg bg-[#1f2937] border border-gray-600 text-sm text-white opacity-100 animate-fade-in"
@@ -130,7 +113,7 @@ export default function PostDetail() {
                 animationFillMode: "forwards",
               }}
             >
-              <div className="flex justify-between items-start">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <div className="font-semibold text-indigo-300">
                   {comment.author}
                 </div>
@@ -140,7 +123,7 @@ export default function PostDetail() {
                     {editingId === comment.id ? (
                       <button
                         onClick={() => {
-                          setComments((prev) =>
+                          setLocalComments((prev) =>
                             prev.map((c) =>
                               c.id === editingId
                                 ? { ...c, content: editText }
@@ -150,7 +133,7 @@ export default function PostDetail() {
                           setEditingId(null);
                           setEditText("");
                         }}
-                        className="btn btn-outline btn-xs text-white border-white/20 hover:border-indigo-300 hover:text-indigo-300 transition"
+                        className="btn btn-outline btn-xs border-white/20 text-white hover:border-indigo-300 hover:text-indigo-300 transition"
                       >
                         저장
                       </button>
@@ -160,7 +143,7 @@ export default function PostDetail() {
                           setEditingId(comment.id);
                           setEditText(comment.content);
                         }}
-                        className="btn btn-outline btn-xs text-white border-white/20 hover:border-indigo-300 hover:text-indigo-300 transition"
+                        className="btn btn-outline btn-xs border-white/20 text-white hover:border-indigo-300 hover:text-indigo-300 transition"
                       >
                         수정
                       </button>
@@ -168,12 +151,12 @@ export default function PostDetail() {
                     <button
                       onClick={() => {
                         if (confirm("정말로 삭제하시겠습니까?")) {
-                          setComments((prev) =>
+                          setLocalComments((prev) =>
                             prev.filter((c) => c.id !== comment.id)
                           );
                         }
                       }}
-                      className="btn btn-outline btn-xs text-white border-white/20 hover:border-red-400 hover:text-red-400 transition"
+                      className="btn btn-outline btn-xs border-white/20 text-white hover:border-red-400 hover:text-red-400 transition"
                     >
                       삭제
                     </button>
@@ -181,7 +164,6 @@ export default function PostDetail() {
                 )}
               </div>
 
-              {/* 댓글 내용 */}
               {editingId === comment.id ? (
                 <textarea
                   value={editText}
@@ -198,8 +180,10 @@ export default function PostDetail() {
           ))}
         </div>
 
-        {/* 댓글 작성 폼 */}
-        <form onSubmit={handleCommentSubmit} className="space-y-2">
+        <form
+          onSubmit={handleCommentSubmit}
+          className="space-y-2 animate-fade-in delay-200"
+        >
           <textarea
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
@@ -209,7 +193,10 @@ export default function PostDetail() {
             required
           />
           <div className="flex justify-end">
-            <button type="submit" className="btn btn-primary btn-sm">
+            <button
+              type="submit"
+              className="btn btn-outline btn-sm border-white/20 text-white hover:border-indigo-300 hover:text-indigo-300 transition"
+            >
               댓글 등록
             </button>
           </div>

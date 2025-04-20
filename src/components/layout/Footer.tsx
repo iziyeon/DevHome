@@ -1,3 +1,4 @@
+// src/components/layout/Footer.tsx
 import { Link, useLocation } from "react-router-dom";
 import { GithubIcon, TwitterIcon, InstagramIcon, BookIcon } from "lucide-react";
 import logo from "../../assets/layout/logo.png";
@@ -26,15 +27,13 @@ export default function Footer() {
 
   return (
     <footer className="bg-transparent text-white w-full py-10 pt-16">
-      <div className="max-w-screen-md mx-auto min-h-[150px] grid grid-cols-1 md:grid-cols-3 gap-8 items-center text-sm px-4">
-        {/* 왼쪽: 로고 */}
-        <div className="flex justify-center">
+      <div className="max-w-screen-md mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 items-center text-sm px-4">
+        <div className="flex justify-center sm:justify-start">
           <Link to="/" className="transition hover:opacity-80">
             <img src={logo} alt="DevHome Logo" className="h-8 w-auto" />
           </Link>
         </div>
 
-        {/* 가운데: 내부 링크 */}
         <div className="flex flex-col items-center gap-2">
           {navLinks.map(({ to, label }) => {
             const isActive = location.pathname === to;
@@ -52,8 +51,7 @@ export default function Footer() {
           })}
         </div>
 
-        {/* 오른쪽: 외부 링크 + 아이콘 */}
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center sm:items-end gap-2">
           {externalLinks.map(({ href, label }) => (
             <a
               key={href}

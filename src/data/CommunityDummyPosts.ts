@@ -85,7 +85,7 @@ function generateCommunityPosts(count: number): CommunityPost[] {
     const author = getRandomItem(authors);
     const category = getRandomItem(categories);
     const date = getRandomDate(i + 1);
-    const readTime = `${Math.floor(Math.random() * 4) + 2} mins read`;
+    const readTime = `${Math.floor(Math.random() * 4) + 2} mins ago`;
 
     return {
       id,

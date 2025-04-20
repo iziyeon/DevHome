@@ -1,9 +1,10 @@
+// src/components/layout/Header.tsx
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/layout/logo.png";
 
-const isLoggedIn = true; // TODO: Firebase Auth로 연동 예정
-const username = "yeon"; // TODO: auth.currentUser.displayName으로 대체 예정
+const isLoggedIn = true;
+const username = "yeon";
 
 const navLinks = [
   { to: () => "/community", label: "Community", always: true },
@@ -86,7 +87,6 @@ export default function Header() {
 
   return (
     <header className="w-full bg-transparent text-white">
-      {/* 상단 네비게이션 바 */}
       <div className="navbar px-6 relative z-50">
         <div className="flex flex-1 items-center gap-6">
           <Link to="/" className="btn btn-ghost text-xl">
@@ -95,10 +95,8 @@ export default function Header() {
           <div className="hidden md:flex gap-4">{renderNavLinks()}</div>
         </div>
 
-        {/* 오른쪽 버튼 */}
         <div className="hidden md:flex gap-2">{renderAuthButtons()}</div>
 
-        {/* 모바일 메뉴 버튼 */}
         <div className="md:hidden">
           <button
             className="btn btn-ghost"
@@ -131,7 +129,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* 모바일 드롭다운 메뉴 */}
       <div
         className={`transition-all duration-300 ease-in-out overflow-hidden md:hidden ${
           isMenuOpen ? "max-h-[500px] py-4" : "max-h-0 py-0"
