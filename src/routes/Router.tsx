@@ -8,14 +8,16 @@ import CommunitySearchResult from "../components/pages/community/CommunitySearch
 import PostWrite from "../pages/PostWrite";
 import CommunityPostDetail from "../components/pages/communityWrite/CommunityPostDetail";
 
-import MyPageLayout from "../components/pages/mypage/layout/MyPageLayout";
-import MyPageHome from "../components/pages/mypage/MyPageHome";
-import PostCategoryPage from "../components/pages/mypage/PostCategoryPage";
-import MyPagePostDetail from "../components/pages/mypage/MyPagePostDetail";
-import MyPagePostWrite from "../components/pages/mypage/MyPagePostWrite";
-import MyPageGuestbook from "../components/pages/mypage/MyPageGuestbook";
-import MyPageQuickLinks from "../components/pages/mypage/MyPageQuickLinks";
-import MyPageSearchResult from "../components/pages/mypage/MyPageSearchResult";
+import MyPage from "../pages/MyPage";
+import MyPageHome from "../components/pages/mypage/home/MyPageHome";
+import PostCategoryPage from "../components/pages/mypage/post/PostCategoryPage";
+import MyPagePostDetail from "../components/pages/mypage/post/MyPagePostDetail";
+import MyPagePostWrite from "../components/pages/mypage/post/MyPagePostWrite";
+import MyPageGuestbook from "../components/pages/mypage/guestbook/MyPageGuestbook";
+import MyPageQuickLinks from "../components/pages/mypage/quicklinks/MyPageQuickLinks";
+import MyPageSearchResult from "../components/pages/mypage/post/MyPageSearchResult";
+
+import SettingsProfile from "../components/pages/mypage/SettingsProfile/SettingsProfile";
 
 export default function Router() {
   return (
@@ -36,7 +38,7 @@ export default function Router() {
           <Route path="/posts/:id" element={<RedirectToCommunityPost />} />
 
           {/* ✅ 마이페이지 구조 */}
-          <Route path="/mypage/:username" element={<MyPageLayout />}>
+          <Route path="/mypage/:username" element={<MyPage />}>
             <Route index element={<MyPageHome />} />
             <Route path="search" element={<MyPageSearchResult />} />
             <Route
@@ -48,13 +50,15 @@ export default function Router() {
             <Route path="guestbook" element={<MyPageGuestbook />} />
             <Route path="links" element={<MyPageQuickLinks />} />
           </Route>
+
+          {/* ✅ 설정 페이지 라우트 */}
+          <Route path="/settings/profile" element={<SettingsProfile />} />
         </Route>
       </Routes>
     </BrowserRouter>
   );
 }
 
-// ✅ 커뮤니티 게시글 리디렉션 컴포넌트
 function RedirectToCommunityPost() {
   const { pathname } = window.location;
   const match = pathname.match(/^\/posts\/(.+)$/);
