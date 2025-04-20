@@ -15,7 +15,6 @@ export default function MyPageQuickLinks() {
   const [editId, setEditId] = useState<string | null>(null);
   const [editLabel, setEditLabel] = useState("");
   const [editUrl, setEditUrl] = useState("");
-
   const [newLabel, setNewLabel] = useState("");
   const [newUrl, setNewUrl] = useState("");
 
@@ -46,7 +45,7 @@ export default function MyPageQuickLinks() {
     if (!newLabel.trim() || !newUrl.trim()) return;
 
     const newLink: QuickLink = {
-      id: Math.random().toString(36).slice(2, 9),
+      id: Date.now().toString(),
       label: newLabel,
       url: newUrl,
       author: "yeon",
@@ -59,33 +58,33 @@ export default function MyPageQuickLinks() {
 
   return (
     <section className="space-y-8 animate-fade-in">
-      <h2 className="flex items-center gap-2 text-xl font-bold text-white border-b border-white/10 pb-1">
-        <ExternalLink className="w-5 h-5 text-white" />
-        바로가기 링크
+      <h2 className="flex items-center gap-2 text-lg font-semibold text-white border-b border-white/10 pb-2">
+        <ExternalLink className="w-5 h-5 text-indigo-300" />
+        바로가기 링크 관리
       </h2>
 
       <ul className="space-y-4">
         {quickLinks.map((link) => (
           <li
             key={link.id}
-            className="flex items-start justify-between rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white shadow-sm backdrop-blur-sm"
+            className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white shadow-sm backdrop-blur-sm flex flex-col sm:flex-row justify-between gap-2"
           >
-            <div className="w-full space-y-1">
+            <div className="flex-1 space-y-1">
               {editId === link.id ? (
                 <>
                   <input
                     value={editLabel}
                     onChange={(e) => setEditLabel(e.target.value)}
-                    className="input input-sm w-full mb-1 text-white bg-[#1f2937] border-white/10"
+                    className="input input-sm w-full bg-[#1f2937] border-white/10 text-white"
                     placeholder="링크 이름"
                   />
                   <input
                     value={editUrl}
                     onChange={(e) => setEditUrl(e.target.value)}
-                    className="input input-sm w-full text-white bg-[#1f2937] border-white/10"
+                    className="input input-sm w-full bg-[#1f2937] border-white/10 text-white"
                     placeholder="https://"
                   />
-                  <div className="mt-2 text-right">
+                  <div className="text-right">
                     <button
                       onClick={handleEditSave}
                       className="btn btn-outline btn-xs text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300 transition"
@@ -101,7 +100,7 @@ export default function MyPageQuickLinks() {
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-white underline hover:text-indigo-300 transition"
+                    className="text-xs underline hover:text-indigo-300 transition"
                   >
                     {link.url}
                   </a>
@@ -110,10 +109,10 @@ export default function MyPageQuickLinks() {
             </div>
 
             {editId !== link.id && (
-              <div className="ml-2 flex items-center gap-2">
+              <div className="flex gap-2">
                 <button
                   onClick={() => handleEditStart(link)}
-                  className="btn btn-outline btn-xs flex items-center gap-1 text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300 transition"
+                  className="btn btn-outline btn-xs text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300 transition flex items-center gap-1"
                 >
                   <Pencil size={14} />
                   수정
@@ -136,13 +135,13 @@ export default function MyPageQuickLinks() {
           value={newLabel}
           onChange={(e) => setNewLabel(e.target.value)}
           placeholder="링크 이름"
-          className="input input-sm w-full text-white bg-[#1f2937] border-white/10"
+          className="input input-sm w-full bg-[#1f2937] border-white/10 text-white"
         />
         <input
           value={newUrl}
           onChange={(e) => setNewUrl(e.target.value)}
           placeholder="https://"
-          className="input input-sm w-full text-white bg-[#1f2937] border-white/10"
+          className="input input-sm w-full bg-[#1f2937] border-white/10 text-white"
         />
         <div className="text-right">
           <button

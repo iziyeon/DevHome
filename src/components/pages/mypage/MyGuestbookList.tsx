@@ -27,9 +27,9 @@ export default function MyGuestbookList({ username }: MyGuestbookListProps) {
   };
 
   return (
-    <div className="space-y-4 animate-fade-in">
-      <h3 className="flex items-center gap-2 text-lg font-semibold text-white border-b border-white/10 pb-1">
-        <MessageSquare size={18} />
+    <section className="space-y-6 animate-fade-in">
+      <h3 className="flex items-center gap-2 text-lg font-semibold text-white border-b border-white/10 pb-2">
+        <MessageSquare size={18} className="text-indigo-300" />
         {username}님의 방명록
       </h3>
 
@@ -43,7 +43,7 @@ export default function MyGuestbookList({ username }: MyGuestbookListProps) {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="메시지를 입력하세요"
-            className="w-full h-15 rounded-md border border-white/10 bg-white/5 p-3 text-sm text-white placeholder-gray-400 backdrop-blur-sm focus:outline-none"
+            className="w-full h-20 rounded-md border border-white/10 bg-[#1f2937] p-3 text-sm text-white placeholder-gray-400 backdrop-blur-sm focus:outline-none"
           />
           <div className="text-right">
             <button
@@ -56,19 +56,17 @@ export default function MyGuestbookList({ username }: MyGuestbookListProps) {
         </div>
       )}
 
-      <div className="space-y-4">
+      <ul className="space-y-4">
         {guestbook.map((entry) => (
-          <div
+          <li
             key={entry.id}
             className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white shadow-sm backdrop-blur-sm"
           >
-            <p>
-              <span className="font-semibold text-gray-200">{entry.from}:</span>{" "}
-              {entry.message}
-            </p>
-          </div>
+            <p className="font-semibold text-indigo-300 mb-1">{entry.from}</p>
+            <p className="whitespace-pre-wrap">{entry.message}</p>
+          </li>
         ))}
-      </div>
-    </div>
+      </ul>
+    </section>
   );
 }
