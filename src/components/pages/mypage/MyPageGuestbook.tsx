@@ -71,7 +71,7 @@ export default function MyPageGuestbook() {
   return (
     <section className="space-y-6 animate-fade-in">
       <h2 className="flex items-center gap-2 text-xl font-bold text-white">
-        <MessageCircle className="w-5 h-5 text-primary" />
+        <MessageCircle className="w-5 h-5  text-white" />
         방명록
       </h2>
 

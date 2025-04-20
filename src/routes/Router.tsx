@@ -10,6 +10,7 @@ import PostCategoryPage from "../components/pages/mypage/PostCategoryPage";
 import MyPagePostDetail from "../components/pages/mypage/MyPagePostDetail";
 import MyPagePostWrite from "../components/pages/mypage/MyPagePostWrite";
 import MyPageGuestbook from "../components/pages/mypage/MyPageGuestbook";
+import MyPageQuickLinks from "../components/pages/mypage/MyPageQuickLinks"; // ✅ 추가 누락 방지
 
 export default function Router() {
   return (
@@ -26,7 +27,8 @@ export default function Router() {
             />
             <Route path="post/:id" element={<MyPagePostDetail />} />
             <Route path="write" element={<MyPagePostWrite />} />
-            <Route path="guestbook" element={<MyPageGuestbook />} />{" "}
+            <Route path="guestbook" element={<MyPageGuestbook />} />
+            <Route path="links" element={<MyPageQuickLinks />} />{" "}
           </Route>
         </Route>
       </Routes>
