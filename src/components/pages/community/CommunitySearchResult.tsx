@@ -1,3 +1,4 @@
+// src/components/pages/community/CommunitySearchResult.tsx
 import { useLocation, Link } from "react-router-dom";
 import { Search } from "lucide-react";
 import { communityDummyPosts } from "../../../data/CommunityDummyPosts";
@@ -16,8 +17,8 @@ export default function CommunitySearchResult() {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold text-white flex items-center gap-2">
+    <div className="space-y-6 px-4 sm:px-6">
+      <h2 className="text-xl font-bold text-white flex items-center gap-2 flex-wrap">
         <Search size={20} />
         <span>
           &quot;{keyword}&quot; 검색 결과{" "}

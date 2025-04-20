@@ -1,3 +1,4 @@
+// src/components/common/SearchInput.tsx
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -33,7 +34,7 @@ export default function SearchInput({
   }, [location.pathname]);
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 sm:space-y-0 sm:flex sm:gap-2">
       <input
         type="text"
         value={keyword}
@@ -45,7 +46,7 @@ export default function SearchInput({
       <button
         type="button"
         onClick={handleSearch}
-        className="btn btn-outline btn-sm w-full border-white/20 text-white hover:text-indigo-300 hover:border-indigo-300 transition-colors duration-200"
+        className="btn btn-outline btn-sm w-full sm:w-auto border-white/20 text-white hover:text-indigo-300 hover:border-indigo-300 transition-colors duration-200"
       >
         검색
       </button>

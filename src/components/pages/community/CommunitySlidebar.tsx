@@ -1,3 +1,4 @@
+// src/components/pages/community/CommunitySlidebar.tsx
 import { Search, Tag } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import SearchInput from "../../common/SearchInput";
@@ -21,7 +22,7 @@ export default function CommunitySlidebar({
 
   return (
     <aside
-      className="space-y-8 text-white bg-white/5 border border-white/10 rounded-xl p-6"
+      className="w-full space-y-8 text-white bg-white/5 border border-white/10 rounded-xl px-4 py-6 sm:p-6"
       aria-label="커뮤니티 필터 사이드바"
     >
       <div>
