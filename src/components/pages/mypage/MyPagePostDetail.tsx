@@ -5,7 +5,7 @@ import { myPageDummyPosts } from "../../../data/MyPageDummyPosts";
 import {
   myPageCommentDummy,
   Comment as MyPageComment,
-} from "../../../data/myPageCommentDummy"; // ✅ alias 적용
+} from "../../../data/myPageCommentDummy";
 
 export default function MyPagePostDetail() {
   const { id, username } = useParams<{ id: string; username: string }>();
@@ -13,21 +13,19 @@ export default function MyPagePostDetail() {
 
   const currentUserNickname = "yeon";
   const post = myPageDummyPosts.find((p) => p.id === id);
-  const initialComments =
-    id && myPageCommentDummy[id] ? myPageCommentDummy[id] : [];
+  const initialComments = id ? myPageCommentDummy[id] || [] : [];
 
-  const [localComments, setLocalComments] = useState<MyPageComment[]>([]);
+  const [comments, setComments] = useState<MyPageComment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
 
   useEffect(() => {
-    setLocalComments(initialComments);
+    setComments(initialComments);
   }, [id]);
 
   const handleDeletePost = () => {
-    const confirmed = confirm("정말로 삭제하시겠습니까?");
-    if (confirmed && post) {
+    if (confirm("정말로 삭제하시겠습니까?") && post) {
       console.log(`🗑 글 삭제됨: ${post.id}`);
       navigate(`/mypage/${username}`);
     }
@@ -44,7 +42,7 @@ export default function MyPagePostDetail() {
       date: new Date().toISOString().slice(0, 10),
     };
 
-    setLocalComments((prev) => [...prev, newComment]);
+    setComments((prev) => [...prev, newComment]);
     setCommentText("");
   };
 
@@ -57,19 +55,22 @@ export default function MyPagePostDetail() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10 text-white">
+    <div className="w-full max-w-3xl mx-auto px-4 py-10 text-white">
       <span className="badge badge-outline text-indigo-300 border-indigo-300 mb-4">
         #{post.category}
       </span>
 
       <h1 className="text-3xl font-bold mb-3">{post.title}</h1>
-      <div className="text-sm text-gray-400 mb-8">{post.date}</div>
+
+      <div className="text-sm text-gray-400 mb-8">
+        {currentUserNickname} · {post.date}
+      </div>
 
       <div className="prose prose-invert whitespace-pre-wrap">
         {post.content || "내용이 없습니다."}
       </div>
 
-      <div className="flex gap-2 justify-end mt-8">
+      <div className="flex flex-wrap gap-2 justify-end mt-8">
         <button
           onClick={() => navigate(`/mypage/${username}/write?id=${post.id}`)}
           className="btn btn-outline btn-sm border-white/20 text-white hover:border-indigo-300 hover:text-indigo-300 transition inline-flex items-center gap-1"
@@ -95,14 +96,13 @@ export default function MyPagePostDetail() {
         </button>
       </div>
 
-      {/* 댓글 */}
       <div className="mt-16 space-y-6 animate-fade-in">
         <h2 className="text-xl font-bold text-white">
-          💬 댓글 {localComments.length}개
+          💬 댓글 {comments.length}개
         </h2>
 
         <div className="space-y-4">
-          {localComments.map((comment, index) => (
+          {comments.map((comment, index) => (
             <div
               key={comment.id}
               className="p-4 rounded-lg bg-[#1f2937] border border-gray-600 text-sm text-white opacity-100 animate-fade-in"
@@ -111,7 +111,7 @@ export default function MyPagePostDetail() {
                 animationFillMode: "forwards",
               }}
             >
-              <div className="flex justify-between items-start">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <div className="font-semibold text-indigo-300">
                   {comment.author}
                 </div>
@@ -121,7 +121,7 @@ export default function MyPagePostDetail() {
                     {editingId === comment.id ? (
                       <button
                         onClick={() => {
-                          setLocalComments((prev) =>
+                          setComments((prev) =>
                             prev.map((c) =>
                               c.id === editingId
                                 ? { ...c, content: editText }
@@ -149,7 +149,7 @@ export default function MyPagePostDetail() {
                     <button
                       onClick={() => {
                         if (confirm("정말로 삭제하시겠습니까?")) {
-                          setLocalComments((prev) =>
+                          setComments((prev) =>
                             prev.filter((c) => c.id !== comment.id)
                           );
                         }
@@ -173,6 +173,7 @@ export default function MyPagePostDetail() {
                   {comment.content}
                 </div>
               )}
+
               <div className="text-gray-400 text-xs mt-2">{comment.date}</div>
             </div>
           ))}

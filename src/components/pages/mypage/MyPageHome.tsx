@@ -32,14 +32,14 @@ export default function MyPageHome() {
     .slice(0, 5);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 md:space-y-10">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-white">마이페이지</h2>
         <button
           onClick={() => navigate(`/mypage/${username}/write`)}
           className="btn btn-outline btn-sm text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300 transition inline-flex items-center gap-1"
         >
-          <PenLine className="w-4 h-4" />
+          <PenLine size={16} />
           글쓰기
         </button>
       </div>
@@ -53,6 +53,7 @@ export default function MyPageHome() {
       <MyPostList posts={filteredPosts} />
 
       <MyGuestbookList username={username} />
+
       <MyQuickLinksPanel links={quickLinks} />
     </div>
   );
