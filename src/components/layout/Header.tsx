@@ -2,9 +2,8 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/layout/logo.png";
 
-
 const isLoggedIn = true; // TODO: Firebase Auth로 연동 예정
-const username = "hong"; // TODO: auth.currentUser.displayName으로 대체 예정
+const username = "yeon"; // TODO: auth.currentUser.displayName으로 대체 예정
 
 const navLinks = [
   { to: () => "/community", label: "Community", always: true },
