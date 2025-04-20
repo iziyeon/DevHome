@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { FilePlus } from "lucide-react";
-import { myPageDummyPosts } from "../../../data/MyPageDummyPosts";
+import { myPageDummyPosts } from "../../../../data/MyPageDummyPosts";
 
 const categoryOptions = [
   { value: "tech", label: "기술 노트" },
@@ -11,6 +11,7 @@ const categoryOptions = [
 ];
 
 export default function MyPagePostWrite() {
+  const { username } = useParams<{ username: string }>();
   const [searchParams] = useSearchParams();
   const postId = searchParams.get("id");
   const isEditMode = Boolean(postId);
@@ -40,18 +41,18 @@ export default function MyPagePostWrite() {
       console.log("마이페이지 글 작성됨:", formData);
     }
 
-    navigate(-1);
+    navigate(`/mypage/${username}`);
   };
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10">
+    <div className="mx-auto max-w-3xl px-4 py-10 text-white">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="flex items-center gap-2 text-3xl font-bold text-white">
+        <h1 className="flex items-center gap-2 text-2xl font-bold">
           <FilePlus size={20} />
           {isEditMode ? "글 수정하기" : "글쓰기"}
         </h1>
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(`/mypage/${username}`)}
           className="btn btn-outline btn-sm border-white/20 text-white hover:border-indigo-300 hover:text-indigo-300 transition"
         >
           목록
@@ -59,27 +60,25 @@ export default function MyPagePostWrite() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* 제목 입력 */}
         <div>
-          <label className="mb-2 block text-sm text-gray-300">제목</label>
+          <label className="mb-1 block text-sm text-gray-300">제목</label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
             placeholder="제목을 입력하세요"
-            className="input input-bordered w-full bg-[#1f2937] text-white"
+            className="input input-bordered w-full bg-[#1f2937] text-white border-white/10 placeholder-white/30"
           />
         </div>
 
-        {/* 카테고리 선택 */}
         <div>
-          <label className="mb-2 block text-sm text-gray-300">카테고리</label>
+          <label className="mb-1 block text-sm text-gray-300">카테고리</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             required
-            className="select select-bordered w-full bg-[#1f2937] text-white"
+            className="select select-bordered w-full bg-[#1f2937] text-white border-white/10"
           >
             <option value="" disabled>
               카테고리를 선택해주세요
@@ -92,20 +91,18 @@ export default function MyPagePostWrite() {
           </select>
         </div>
 
-        {/* 내용 작성 */}
         <div>
-          <label className="mb-2 block text-sm text-gray-300">내용</label>
+          <label className="mb-1 block text-sm text-gray-300">내용</label>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             required
             placeholder="내용을 입력하세요"
             rows={12}
-            className="textarea textarea-bordered w-full bg-[#1f2937] text-white"
+            className="textarea textarea-bordered w-full bg-[#1f2937] text-white border-white/10 placeholder-white/30"
           />
         </div>
 
-        {/* 작성 or 수정 버튼 */}
         <div className="flex justify-end">
           <button
             type="submit"

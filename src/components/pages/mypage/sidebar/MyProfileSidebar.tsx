@@ -7,6 +7,10 @@ import {
   UserRoundCog,
   Folder,
   Paperclip,
+  Github,
+  Twitter,
+  Instagram,
+  Notebook,
 } from "lucide-react";
 import SearchInput from "../../../common/SearchInput";
 import defaultProfile from "../../../../assets/layout/default.jpg";
@@ -22,11 +26,33 @@ const CATEGORIES = [
   { key: "project", label: "프로젝트", icon: <BookText size={16} /> },
 ];
 
+const SNS_LINKS = [
+  {
+    label: "GitHub",
+    icon: <Github size={18} />,
+    url: "https://github.com/yeon",
+  },
+  {
+    label: "Notion",
+    icon: <Notebook size={18} />,
+    url: "https://notion.so/yeon",
+  },
+  {
+    label: "Twitter",
+    icon: <Twitter size={18} />,
+    url: "https://twitter.com/yourhandle",
+  },
+  {
+    label: "Instagram",
+    icon: <Instagram size={18} />,
+    url: "https://instagram.com/yourid",
+  },
+];
+
 export default function MyProfileSidebar({ username }: MyProfileSidebarProps) {
   return (
     <aside className="w-full md:w-[240px] text-white">
       <div className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-6">
-        {/* 프로필 */}
         <div className="text-center space-y-2">
           <img
             src={defaultProfile}
@@ -37,12 +63,8 @@ export default function MyProfileSidebar({ username }: MyProfileSidebarProps) {
           <p className="text-sm text-gray-300">기록하고 공유하며 성장합니다.</p>
         </div>
 
-        {/* 검색 */}
-        <div className="space-y-2">
-          <SearchInput navigateTo={`/mypage/${username}/search`} />
-        </div>
+        <SearchInput navigateTo={`/mypage/${username}/search`} />
 
-        {/* 카테고리 */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold flex items-center gap-2 text-indigo-300">
             <Folder size={16} />글 카테고리
@@ -62,7 +84,6 @@ export default function MyProfileSidebar({ username }: MyProfileSidebarProps) {
           </ul>
         </div>
 
-        {/* 기타 메뉴 */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold flex items-center gap-2 text-indigo-300">
             <Paperclip size={16} />
@@ -80,7 +101,7 @@ export default function MyProfileSidebar({ username }: MyProfileSidebarProps) {
             </li>
             <li>
               <Link
-                to={`/mypage/${username}/quicklinks`}
+                to={`/mypage/${username}/links`}
                 className="flex items-center gap-2 hover:text-indigo-300 transition"
               >
                 <BookText size={16} />
@@ -90,8 +111,22 @@ export default function MyProfileSidebar({ username }: MyProfileSidebarProps) {
           </ul>
         </div>
 
-        {/* 설정 */}
-        <div className="pt-2 border-t border-white/10 text-center">
+        <div className="flex justify-center gap-4 pt-2">
+          {SNS_LINKS.map((link) => (
+            <a
+              key={link.label}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-indigo-300 transition"
+              aria-label={link.label}
+            >
+              {link.icon}
+            </a>
+          ))}
+        </div>
+
+        <div className="pt-2 text-center">
           <Link
             to="/settings/profile"
             className="btn btn-sm btn-outline text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300"

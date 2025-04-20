@@ -1,5 +1,4 @@
 import { useState } from "react";
-// import { useParams } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 
 const isLoggedIn = true;
@@ -13,8 +12,6 @@ interface GuestbookEntry {
 }
 
 export default function MyPageGuestbook() {
-  // const { username: _username } = useParams<{ username: string }>(); // ⚠️ 추후 Firestore용
-
   const [entries, setEntries] = useState<GuestbookEntry[]>([
     {
       id: "g1",
@@ -38,20 +35,21 @@ export default function MyPageGuestbook() {
     e.preventDefault();
     if (!newEntry.trim()) return;
 
-    const newComment: GuestbookEntry = {
-      id: Math.random().toString(36).slice(2, 9),
-      author: currentUserNickname,
-      content: newEntry,
-      date: new Date().toISOString().slice(0, 10),
-    };
-
-    setEntries((prev) => [...prev, newComment]);
+    setEntries([
+      ...entries,
+      {
+        id: Date.now().toString(),
+        author: currentUserNickname,
+        content: newEntry,
+        date: new Date().toISOString().slice(0, 10),
+      },
+    ]);
     setNewEntry("");
   };
 
   const handleDelete = (id: string) => {
     if (confirm("정말로 삭제하시겠습니까?")) {
-      setEntries((prev) => prev.filter((entry) => entry.id !== id));
+      setEntries(entries.filter((entry) => entry.id !== id));
     }
   };
 
@@ -61,8 +59,8 @@ export default function MyPageGuestbook() {
   };
 
   const handleEditSave = () => {
-    setEntries((prev) =>
-      prev.map((e) => (e.id === editingId ? { ...e, content: editText } : e))
+    setEntries(
+      entries.map((e) => (e.id === editingId ? { ...e, content: editText } : e))
     );
     setEditingId(null);
     setEditText("");
@@ -70,21 +68,21 @@ export default function MyPageGuestbook() {
 
   return (
     <section className="space-y-6 animate-fade-in">
-      <h2 className="flex items-center gap-2 text-xl font-bold text-white">
-        <MessageCircle className="w-5 h-5  text-white" />
+      <h2 className="flex items-center gap-2 text-lg font-semibold text-white border-b border-white/10 pb-2">
+        <MessageCircle className="w-5 h-5 text-indigo-300" />
         방명록
       </h2>
 
-      {/* 메시지 목록 */}
       <ul className="space-y-4">
         {entries.map((item) => (
           <li
             key={item.id}
-            className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white"
+            className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white shadow-sm backdrop-blur-sm"
           >
             <div className="flex items-start justify-between">
-              <div className="font-semibold text-indigo-300">{item.author}</div>
-
+              <span className="font-semibold text-indigo-300">
+                {item.author}
+              </span>
               {item.author === currentUserNickname && (
                 <div className="flex gap-2">
                   {editingId === item.id ? (
@@ -119,14 +117,13 @@ export default function MyPageGuestbook() {
                 className="mt-2 w-full rounded px-2 py-1 text-sm text-white bg-[#1f2937] border border-white/10"
               />
             ) : (
-              <div className="mt-2 whitespace-pre-wrap">{item.content}</div>
+              <p className="mt-2 whitespace-pre-wrap">{item.content}</p>
             )}
             <div className="mt-2 text-xs text-gray-400">{item.date}</div>
           </li>
         ))}
       </ul>
 
-      {/* 입력 폼 */}
       {isLoggedIn ? (
         <form onSubmit={handleSubmit} className="space-y-2">
           <textarea
@@ -134,7 +131,7 @@ export default function MyPageGuestbook() {
             onChange={(e) => setNewEntry(e.target.value)}
             placeholder="메시지를 입력하세요"
             rows={4}
-            className="w-full rounded-md border border-white/10 bg-[#1f2937] px-4 py-2 text-white placeholder-white/40"
+            className="w-full rounded-md border border-white/10 bg-[#1f2937] px-4 py-2 text-white placeholder-gray-400"
           />
           <div className="text-right">
             <button

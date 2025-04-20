@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { Post } from "../../../../src/data/MyPageDummyPosts";
+import { Post } from "../../../../data/MyPageDummyPosts";
 
 interface MyPostListProps {
   posts: Post[];
