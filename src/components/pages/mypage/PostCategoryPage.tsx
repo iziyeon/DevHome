@@ -30,7 +30,7 @@ export default function PostCategoryPage() {
     <div className="max-w-5xl mx-auto px-6 py-14 text-white animate-fade-in">
       <header className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold border-b border-white/10 pb-2">
-          {categoryMap[categoryKey]} 글 목록
+          {categoryMap[categoryKey]}
         </h2>
 
         <Link
