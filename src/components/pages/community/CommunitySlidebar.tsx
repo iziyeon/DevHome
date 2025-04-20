@@ -1,6 +1,6 @@
-// src/components/pages/community/CommunitySlidebar.tsx
 import { Search, Tag } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import SearchInput from "../../common/SearchInput";
 
 interface CommunitySlidebarProps {
   onCategoryClick?: () => void;
@@ -20,23 +20,18 @@ export default function CommunitySlidebar({
   const currentCategory = new URLSearchParams(location.search).get("category");
 
   return (
-    <aside className="space-y-8 text-white" aria-label="커뮤니티 필터 사이드바">
-      {/* 🔍 검색 */}
+    <aside
+      className="space-y-8 text-white bg-white/5 border border-white/10 rounded-xl p-6"
+      aria-label="커뮤니티 필터 사이드바"
+    >
       <div>
         <h3 className="text-lg font-semibold flex items-center gap-2 mb-2">
           <Search size={18} />
-          검색
+          게시글 검색
         </h3>
-        <input
-          type="text"
-          name="search"
-          aria-label="게시글 검색어 입력"
-          placeholder="검색어 입력"
-          className="input input-bordered w-full bg-[#1f2937] text-white placeholder-gray-400"
-        />
+        <SearchInput navigateTo="/community/search" />
       </div>
 
-      {/* 🏷 카테고리 그룹 */}
       <div>
         <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
           <Tag size={18} />
@@ -52,7 +47,6 @@ export default function CommunitySlidebar({
               <ul className="space-y-1 text-sm">
                 {categories.map((category) => {
                   const isActive = currentCategory === category;
-
                   return (
                     <li key={category}>
                       <Link

@@ -1,8 +1,7 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
-import PostCard from "./PostCard";
 import { communityDummyPosts } from "../../../data/CommunityDummyPosts";
 
-const POSTS_PER_PAGE = 6;
+const POSTS_PER_PAGE = 12;
 
 export default function CommunityPostGrid() {
   const [searchParams] = useSearchParams();
@@ -12,13 +11,11 @@ export default function CommunityPostGrid() {
   const category = searchParams.get("category") || "전체";
   const sort = searchParams.get("sort") || "desc";
 
-  // 카테고리 필터링
   const filteredPosts =
     category === "전체"
       ? communityDummyPosts
       : communityDummyPosts.filter((post) => post.category === category);
 
-  // 정렬 처리
   const sortedPosts = [...filteredPosts].sort((a, b) => {
     if (!a.date || !b.date) return 0;
     return sort === "asc"
@@ -26,7 +23,6 @@ export default function CommunityPostGrid() {
       : b.date.localeCompare(a.date);
   });
 
-  // 페이지 분할
   const startIndex = (page - 1) * POSTS_PER_PAGE;
   const currentPosts = sortedPosts.slice(
     startIndex,
@@ -36,21 +32,25 @@ export default function CommunityPostGrid() {
 
   return (
     <div className="flex flex-col justify-between min-h-[600px] space-y-8">
-      {/* 게시글 카드 그리드 */}
-      <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-5xl mx-auto">
         {currentPosts.map((post) => (
-          <PostCard key={post.id} {...post} />
+          <button
+            key={post.id}
+            onClick={() => navigate(`/posts/${post.id}`)}
+            className="w-full text-left rounded-xl bg-white/5 border border-white/10 p-4 text-white hover:text-indigo-300 hover:border-indigo-300 transition"
+          >
+            <p className="font-semibold truncate">{post.title}</p>
+            <p className="text-xs text-gray-400 mt-1">{post.date}</p>
+          </button>
         ))}
       </div>
 
-      {/* 게시글이 없을 때 */}
       {currentPosts.length === 0 && (
         <div className="text-gray-400 text-center py-16">
           게시글이 없습니다.
         </div>
       )}
 
-      {/* 페이지네이션 */}
       <div className="flex justify-center gap-2 pt-8 mt-auto">
         {Array.from({ length: totalPages }, (_, i) => {
           const newParams = new URLSearchParams(searchParams);
