@@ -2,10 +2,10 @@ import { useNavigate, useOutletContext, useLocation } from "react-router-dom";
 import { PenLine } from "lucide-react";
 import MyIntroBanner from "./MyIntroBanner";
 import MyPostList from "./MyPostList";
-import MyGuestbookList from "./MyGuestbookList";
-import MyQuickLinksPanel from "./MyQuickLinksPanel";
-import { myPageDummyPosts } from "../../../data/MyPageDummyPosts";
-import type { QuickLink } from "./MyQuickLinksPanel";
+import MyGuestbookList from "../guestbook/MyGuestbookList";
+import MyQuickLinksPanel from "../quicklinks/MyQuickLinksPanel";
+import { myPageDummyPosts } from "../../../../data/MyPageDummyPosts";
+import type { QuickLink } from "../quicklinks/MyQuickLinksPanel";
 
 interface OutletContext {
   username: string;

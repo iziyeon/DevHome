@@ -12,7 +12,7 @@ import {
   Instagram,
   Notebook,
 } from "lucide-react";
-import SearchInput from "../../common/SearchInput";
+import SearchInput from "../../../common/SearchInput";
 import defaultProfile from "../../../../assets/layout/default.jpg";
 
 interface MyProfileSidebarProps {

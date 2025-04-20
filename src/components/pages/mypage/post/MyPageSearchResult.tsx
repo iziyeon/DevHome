@@ -1,6 +1,6 @@
 import { useSearchParams, useParams, Link } from "react-router-dom";
 import { useState } from "react";
-import { myPageDummyPosts } from "../../../data/MyPageDummyPosts";
+import { myPageDummyPosts } from "../../../../data/MyPageDummyPosts";
 import { Search } from "lucide-react";
 
 const postsPerPage = 6;

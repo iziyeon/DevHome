@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useState } from "react";
-import { myPageDummyPosts, Post } from "../../../data/MyPageDummyPosts";
+import { myPageDummyPosts, Post } from "../../../../data/MyPageDummyPosts";
 import { PenLine } from "lucide-react";
 
 const postsPerPage = 6;

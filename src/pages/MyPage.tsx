@@ -1,7 +1,7 @@
 import { Outlet, useParams } from "react-router-dom";
 import { useState } from "react";
-import MyProfileSidebar from "../components/pages/mypage/MyProfileSidebar";
-import type { QuickLink } from "../components/pages/mypage/MyPageQuickLinks";
+import MyProfileSidebar from "../components/pages/mypage/sidebar/MyProfileSidebar";
+import type { QuickLink } from "../components/pages/mypage/quicklinks/MyPageQuickLinks";
 
 const DEFAULT_QUICK_LINKS: QuickLink[] = [
   {

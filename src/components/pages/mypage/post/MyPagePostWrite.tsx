@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { FilePlus } from "lucide-react";
-import { myPageDummyPosts } from "../../../data/MyPageDummyPosts";
+import { myPageDummyPosts } from "../../../../data/MyPageDummyPosts";
 
 const categoryOptions = [
   { value: "tech", label: "기술 노트" },

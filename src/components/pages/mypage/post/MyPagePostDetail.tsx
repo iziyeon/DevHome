@@ -1,11 +1,11 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { PenLine, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { myPageDummyPosts } from "../../../data/MyPageDummyPosts";
+import { myPageDummyPosts } from "../../../../data/MyPageDummyPosts";
 import {
   myPageCommentDummy,
   Comment as MyPageComment,
-} from "../../../data/myPageCommentDummy";
+} from "../../../../data/myPageCommentDummy";
 
 export default function MyPagePostDetail() {
   const { id, username } = useParams<{ id: string; username: string }>();
