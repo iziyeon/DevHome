@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/layout/logo.png";
 
-const isLoggedIn = true;
+const isLoggedIn = false;
 const username = "yeon";
 
 const navLinks = [
@@ -44,13 +44,14 @@ export default function Header() {
     });
 
   const renderAuthButtons = (isMobile = false) => {
+    const baseClass =
+      "btn btn-outline rounded-full text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300 transition";
+
     if (isLoggedIn) {
       return (
         <button
           onClick={isMobile ? () => setIsMenuOpen(false) : undefined}
-          className={`btn btn-outline ${
-            isMobile ? "text-left" : "btn-sm rounded-full"
-          } border-primary text-white hover:bg-primary hover:text-white transition`}
+          className={`${baseClass} ${isMobile ? "w-full text-left" : "btn-sm"}`}
         >
           Logout
         </button>
@@ -63,8 +64,8 @@ export default function Header() {
           <Link
             to="/login"
             onClick={isMobile ? () => setIsMenuOpen(false) : undefined}
-            className={`btn ${
-              isMobile ? "btn-ghost text-left" : "btn-sm btn-ghost"
+            className={`${baseClass} ${
+              isMobile ? "w-full text-left" : "btn-sm"
             }`}
           >
             Login
@@ -74,8 +75,8 @@ export default function Header() {
           <Link
             to="/signup"
             onClick={isMobile ? () => setIsMenuOpen(false) : undefined}
-            className={`btn ${
-              isMobile ? "btn-ghost text-left" : "btn-sm btn-primary"
+            className={`${baseClass} ${
+              isMobile ? "w-full text-left" : "btn-sm"
             }`}
           >
             Sign Up
