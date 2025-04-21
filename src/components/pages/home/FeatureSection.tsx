@@ -62,23 +62,17 @@ export default function FeatureSection() {
           autoplay={{ delay: 5000, disableOnInteraction: false }}
           loop={true}
           breakpoints={{
-            0: {
-              slidesPerView: 1,
-              spaceBetween: 16,
-            },
-            768: {
-              slidesPerView: 2,
-              spaceBetween: 24,
-            },
+            0: { slidesPerView: 1, spaceBetween: 16 },
+            768: { slidesPerView: 2, spaceBetween: 24 },
           }}
           className="mb-12"
         >
           {topFeatures.map(({ title, icon, description }) => (
             <SwiperSlide key={title} className="flex justify-center">
               <div
-                className="w-full max-w-[540px] min-w-[300px] h-[500px] min-h-[460px] max-h-[520px]
+                className="w-full max-w-[540px] min-w-[300px] h-[480px]
                            bg-white/5 border border-white/10 rounded-xl p-6 shadow-md flex flex-col gap-4
-                           transition-all duration-300 hover:bg-white/10 hover:shadow-xl hover:border-indigo-300"
+                           hover:border-indigo-300 hover:shadow-[0_0_12px_#6366f1] transition-all duration-300"
               >
                 <div className="flex items-center gap-2">
                   {icon}

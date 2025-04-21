@@ -1,37 +1,31 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import GoogleLoginButton from "../../common/GoogleLoginButton";
 
 export default function HeroSection() {
   const fullText = "개발자의 이야기를 담는 집\nDevHome";
   const [typedText, setTypedText] = useState("");
   const [index, setIndex] = useState(0);
-
   const isTypingDone = index >= fullText.length;
 
   useEffect(() => {
-    const typeText = () => {
-      if (index < fullText.length) {
+    if (index < fullText.length) {
+      const timeout = setTimeout(() => {
         setTypedText((prev) => prev + fullText.charAt(index));
-        setIndex(index + 1);
-      }
-    };
-
-    const timeout = setTimeout(typeText, 100);
-    return () => clearTimeout(timeout);
+        setIndex((prev) => prev + 1);
+      }, 100);
+      return () => clearTimeout(timeout);
+    }
   }, [index, fullText]);
-
-  const handleGoogleLogin = () => {
-    console.log("🟡 Google 로그인 진행 예정");
-  };
 
   const titleLines = typedText.split("\n");
 
   return (
-    <section className="relative flex flex-col justify-center items-center text-center px-6 min-h-[45vh]  text-white overflow-hidden">
+    <section className="relative flex flex-col justify-center items-center text-center px-6 min-h-[45vh] text-white overflow-hidden">
       <div className="z-10">
         <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-purple-400 to-pink-400 min-h-[5rem]">
           {titleLines.map((line, i) => (
-            <div key={i}>
+            <div key={i} className={i === 0 ? "whitespace-nowrap" : ""}>
               {line}
               {i === titleLines.length - 1 && !isTypingDone && (
                 <span className="animate-blink">|</span>
@@ -45,22 +39,20 @@ export default function HeroSection() {
           공간
         </p>
 
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4">
-          <button
-            onClick={handleGoogleLogin}
-            className="btn btn-primary px-5 py-3 text-sm font-semibold rounded-md leading-none tracking-tight hover:scale-105 transition-transform duration-200"
-          >
-            Get Started for Google
-          </button>
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 max-w-xs sm:max-w-none mx-auto w-full">
+          <GoogleLoginButton
+            onClick={() => console.log("🟡 Google 로그인 예정")}
+            className="w-full sm:w-auto px-5 py-3"
+          />
           <Link
             to="/login"
-            className="btn btn-outline border-white text-white px-5 py-3 text-sm font-semibold rounded-md leading-none tracking-tight hover:bg-white hover:text-black hover:scale-105 transition-transform duration-200"
+            className="btn btn-outline w-full sm:w-auto rounded-full text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300 transition px-5 py-3"
           >
-            Email Login
+            이메일로 로그인
           </Link>
           <Link
             to="/signup"
-            className="btn btn-ghost text-white px-5 py-3 text-sm font-semibold rounded-md leading-none tracking-tight hover:text-indigo-300 hover:scale-105 transition-transform duration-200"
+            className="btn btn-outline w-full sm:w-auto rounded-full text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300 transition px-5 py-3"
           >
             이메일로 가입하기
           </Link>
