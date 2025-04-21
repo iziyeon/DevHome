@@ -13,6 +13,7 @@
     "@chakra-ui/theme": "^3.4.6",
     "@chakra-ui/theme-tools": "^2.2.6",
     "daisyui": "^3.1.6",
+    "html2pdf.js": "^0.10.3",
     "lucide-react": "^0.487.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
