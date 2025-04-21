@@ -1,20 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useReactToPrint } from "react-to-print";
-import type { UseReactToPrintOptions } from "react-to-print";
 import { Pencil, FilePlus } from "lucide-react";
+import html2pdf from "html2pdf.js";
 import { ResumeData } from "../types/resumeTypes";
-
-const categoryLabels: Record<string, string> = {
-  frontend: "Frontend",
-  backend: "Backend",
-  etc: "기타 기술",
-};
+import ResumePrintView from "../components/pages/resume/ResumePrintView";
 
 export default function Resume() {
   const navigate = useNavigate();
-  const resumeRef = useRef<HTMLDivElement>(null);
   const [resume, setResume] = useState<ResumeData | null>(null);
+  const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("resume");
@@ -23,10 +17,20 @@ export default function Resume() {
     }
   }, []);
 
-  const handlePrint = useReactToPrint({
-    content: (): HTMLElement | null => resumeRef.current,
-    documentTitle: "이력서",
-  } as UseReactToPrintOptions);
+  const handleDownload = () => {
+    if (!printRef.current) return;
+
+    html2pdf()
+      .set({
+        margin: 0,
+        filename: "이력서.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      })
+      .from(printRef.current)
+      .save();
+  };
 
   return (
     <section className="max-w-4xl mx-auto py-16 px-4 text-white space-y-12">
@@ -48,7 +52,8 @@ export default function Resume() {
         </p>
       ) : (
         <>
-          <div ref={resumeRef} className="space-y-12">
+          <div className="space-y-12">
+            {/* 프로필 */}
             <div className="text-center space-y-3">
               <img
                 src={resume.profile.image}
@@ -61,48 +66,44 @@ export default function Resume() {
               <p className="text-white/80 mt-2">{resume.profile.tagline}</p>
             </div>
 
-            {Object.values(resume.techStack).some((items) =>
-              (items as string[]).some((item) => item.trim() !== "")
-            ) && (
+            {/* 기술 스택 */}
+            {(resume.techStack.frontend.length ||
+              resume.techStack.backend.length ||
+              resume.techStack.etc.length) > 0 && (
               <div>
                 <h2 className="text-xl font-bold text-indigo-300 mb-2">
                   기술 스택
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-white/80">
-                  {Object.entries(resume.techStack)
-                    .filter(([, items]) =>
-                      (items as string[]).some((item) => item.trim() !== "")
-                    )
-                    .map(([category, items]) => (
-                      <div key={category}>
-                        <h3 className="font-semibold capitalize mb-1">
-                          {categoryLabels[category] || category}
-                        </h3>
-                        <ul className="list-disc pl-5 space-y-1">
-                          {(items as string[]).map((item, i) =>
-                            item.trim() !== "" ? <li key={i}>{item}</li> : null
-                          )}
-                        </ul>
-                      </div>
-                    ))}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm text-white/80">
+                  {Object.entries(resume.techStack).map(([key, items]) => (
+                    <div key={key}>
+                      <h3 className="font-semibold capitalize mb-1">{key}</h3>
+                      <ul className="list-disc pl-5 space-y-1">
+                        {(items as string[]).map((item: string, i: number) =>
+                          item ? <li key={i}>{item}</li> : null
+                        )}
+                      </ul>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
 
+            {/* 프로젝트 */}
             {resume.projects.length > 0 && (
               <div>
                 <h2 className="text-xl font-bold text-indigo-300 mb-2">
                   프로젝트
                 </h2>
                 <div className="space-y-6">
-                  {resume.projects.map((p, i) => (
+                  {resume.projects.map((p, i: number) => (
                     <div
                       key={i}
                       className="bg-white/5 p-4 rounded-xl space-y-2 border border-white/10"
                     >
                       <h3 className="font-semibold">{p.title}</h3>
                       <p className="text-sm text-white/70">{p.description}</p>
-                      <p className="text-sm text-white/50">[ {p.stack} ]</p>
+                      <p className="text-sm text-white/50">[{p.stack}]</p>
                       <p className="text-sm text-white/80">{p.role}</p>
                       <div className="flex gap-4 text-sm">
                         {p.deployUrl && (
@@ -132,11 +133,12 @@ export default function Resume() {
               </div>
             )}
 
+            {/* 경력 */}
             {resume.career.experience.length > 0 && (
               <div>
                 <h2 className="text-xl font-bold text-indigo-300 mb-2">경력</h2>
                 <div className="space-y-4">
-                  {resume.career.experience.map((e, i) => (
+                  {resume.career.experience.map((e, i: number) => (
                     <div key={i}>
                       <p className="font-semibold">
                         {e.company} | {e.position}
@@ -149,11 +151,12 @@ export default function Resume() {
               </div>
             )}
 
+            {/* 교육 */}
             {resume.career.education.length > 0 && (
               <div>
                 <h2 className="text-xl font-bold text-indigo-300 mb-2">교육</h2>
                 <div className="space-y-4">
-                  {resume.career.education.map((e, i) => (
+                  {resume.career.education.map((e, i: number) => (
                     <div key={i}>
                       <p className="font-semibold">{e.title}</p>
                       <p className="text-sm text-white/50">
@@ -165,11 +168,12 @@ export default function Resume() {
               </div>
             )}
 
+            {/* 링크 */}
             {resume.career.links.length > 0 && (
               <div>
                 <h2 className="text-xl font-bold text-indigo-300 mb-2">링크</h2>
                 <ul className="space-y-2 text-sm">
-                  {resume.career.links.map((link, i) => (
+                  {resume.career.links.map((link, i: number) => (
                     <li key={i}>
                       <a
                         href={link.url}
@@ -186,14 +190,22 @@ export default function Resume() {
             )}
           </div>
 
+          {/* PDF 다운로드 버튼 */}
           <div className="text-center pt-6">
             <button
               type="button"
-              onClick={() => handlePrint?.()}
+              onClick={handleDownload}
               className="btn btn-outline text-white border-white/20 rounded-full hover:border-indigo-300 hover:text-indigo-300"
             >
-              PDF로 출력하기
+              PDF로 다운로드
             </button>
+          </div>
+
+          {/* 숨겨진 출력용 */}
+          <div style={{ display: "none" }}>
+            <div ref={printRef}>
+              {resume && <ResumePrintView resume={resume} />}
+            </div>
           </div>
         </>
       )}
