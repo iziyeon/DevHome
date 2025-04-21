@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { ExternalLink, Trash2, Pencil } from "lucide-react";
-import type { QuickLink } from "./MyQuickLinksPanel";
+
+interface QuickLink {
+  id: string;
+  label: string;
+  url: string;
+  author: string;
+}
 
 interface OutletContext {
   username: string;

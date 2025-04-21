@@ -1,7 +1,14 @@
 import { Outlet, useParams } from "react-router-dom";
 import { useState } from "react";
 import MyProfileSidebar from "../components/pages/mypage/sidebar/MyProfileSidebar";
-import type { QuickLink } from "../components/pages/mypage/quicklinks/MyPageQuickLinks";
+
+// ✅ QuickLink 타입을 직접 정의
+interface QuickLink {
+  id: string;
+  label: string;
+  url: string;
+  author: string;
+}
 
 const DEFAULT_QUICK_LINKS: QuickLink[] = [
   {
@@ -36,6 +43,7 @@ export default function MyPage() {
       <div className="md:sticky md:top-20">
         <MyProfileSidebar username={username} />
       </div>
+
       <div className="space-y-6 md:space-y-8">
         <Outlet context={{ username, quickLinks, setQuickLinks }} />
       </div>
