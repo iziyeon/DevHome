@@ -1,5 +1,3 @@
-// src/components/pages/signup/SignupForm.tsx
-
 import {
   LogInIcon,
   LockIcon,
@@ -54,7 +52,7 @@ export default function SignupForm({
   return (
     <form
       onSubmit={onSubmit}
-      className="w-full max-w-md space-y-4 bg-white/5 backdrop-blur-md p-8 rounded-2xl shadow-lg"
+      className="w-full max-w-lg sm:max-w-md space-y-4 bg-white/5 backdrop-blur-md p-8 rounded-2xl shadow-lg"
     >
       <h1 className="text-3xl font-bold text-center text-white">회원가입</h1>
 

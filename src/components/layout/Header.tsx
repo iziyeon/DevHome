@@ -1,46 +1,57 @@
-// src/components/layout/Header.tsx
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/layout/logo.png";
-
-const isLoggedIn = true;
-const username = "yeon";
-
-const navLinks = [
-  { to: () => "/community", label: "Community", always: true },
-  { to: () => "/resume", label: "Resume", authOnly: true },
-  {
-    to: (username?: string) => (username ? `/mypage/${username}` : "/mypage"),
-    label: "Mypage",
-    authOnly: true,
-  },
-];
+import { useUserStore } from "../../stores/useUserStore";
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase";
 
 export default function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const user = useUserStore((state) => state.user);
+  const clearUser = useUserStore((state) => state.clearUser);
+  const isLoggedIn = Boolean(user);
 
   const isCurrent = (path: string) =>
     location.pathname === path ? "text-indigo-300 font-bold underline" : "";
 
+  const navLinks = [
+    { to: "/community", label: "Community", show: true },
+    { to: "/resume", label: "Resume", show: isLoggedIn },
+    {
+      to: `/mypage/${user?.nickname || "mypage"}`,
+      label: "Mypage",
+      show: isLoggedIn,
+    },
+  ];
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      clearUser();
+      navigate("/");
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+    }
+  };
+
   const renderNavLinks = (isMobile = false) =>
-    navLinks.map(({ to, label, always, authOnly }) => {
-      if (always || (authOnly && isLoggedIn)) {
-        const path = to(username);
-        return (
-          <Link
-            key={label}
-            to={path}
-            onClick={isMobile ? () => setIsMenuOpen(false) : undefined}
-            className={`btn btn-ghost ${
-              isMobile ? "text-left justify-start" : "text-base"
-            } hover:underline ${isCurrent(path)}`}
-          >
-            {label}
-          </Link>
-        );
-      }
-      return null;
+    navLinks.map(({ to, label, show }) => {
+      if (!show) return null;
+      return (
+        <Link
+          key={label}
+          to={to}
+          onClick={isMobile ? () => setIsMenuOpen(false) : undefined}
+          className={`btn btn-ghost ${
+            isMobile ? "text-left justify-start" : "text-base"
+          } hover:underline hover:text-indigo-300 ${isCurrent(to)}`}
+        >
+          {label}
+        </Link>
+      );
     });
 
   const renderAuthButtons = (isMobile = false) => {
@@ -50,7 +61,10 @@ export default function Header() {
     if (isLoggedIn) {
       return (
         <button
-          onClick={isMobile ? () => setIsMenuOpen(false) : undefined}
+          onClick={() => {
+            handleLogout();
+            if (isMobile) setIsMenuOpen(false);
+          }}
           className={`${baseClass} ${isMobile ? "w-full text-left" : "btn-sm"}`}
         >
           Logout
@@ -87,16 +101,21 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full bg-transparent text-white">
-      <div className="navbar px-6 relative z-50">
-        <div className="flex flex-1 items-center gap-6">
-          <Link to="/" className="btn btn-ghost text-xl">
-            <img src={logo} alt="DevHome Logo" className="h-8 w-auto" />
+    <header className="w-full bg-transparent text-white z-50">
+      <div className="navbar px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex-1 flex items-center gap-6">
+          <Link
+            to="/"
+            className="btn btn-ghost text-xl flex items-center gap-2"
+          >
+            <img src={logo} alt="DevHome Logo" className="h-8 w-auto sm:h-9" />
           </Link>
           <div className="hidden md:flex gap-4">{renderNavLinks()}</div>
         </div>
 
-        <div className="hidden md:flex gap-2">{renderAuthButtons()}</div>
+        <div className="hidden md:flex gap-3 items-center">
+          {renderAuthButtons()}
+        </div>
 
         <div className="md:hidden">
           <button
@@ -130,10 +149,11 @@ export default function Header() {
         </div>
       </div>
 
+      {/* 모바일 메뉴 */}
       <div
         className={`transition-all duration-300 ease-in-out overflow-hidden md:hidden ${
           isMenuOpen ? "max-h-[500px] py-4" : "max-h-0 py-0"
-        } bg-[#1e1e2e] text-white border-t border-[#2d2d3a] px-6 flex flex-col gap-3`}
+        } bg-[#1e1e2e] border-t border-[#2d2d3a] px-6 flex flex-col gap-3`}
       >
         {renderNavLinks(true)}
         {renderAuthButtons(true)}

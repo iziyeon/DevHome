@@ -1,7 +1,10 @@
-// src/pages/Login.tsx
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { FirebaseError } from "firebase/app";
+import { auth, db } from "../firebase";
+import { useUserStore } from "../stores/useUserStore";
 import LoginForm from "../components/pages/login/LoginForm";
 
 export default function Login() {
@@ -12,7 +15,7 @@ export default function Login() {
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     let isValid = true;
@@ -41,8 +44,41 @@ export default function Login() {
 
     if (!isValid) return;
 
-    const username = "hong"; // TODO: Firebase 연동 시 교체
-    navigate(`/mypage/${username}`);
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+
+      const docRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        useUserStore.getState().setUser({
+          uid: user.uid,
+          name: userData.name,
+          nickname: userData.nickname,
+          email: userData.email,
+        });
+        navigate(`/mypage/${userData.nickname}`);
+      } else {
+        console.warn("Firestore에 유저 정보가 없습니다.");
+        alert("사용자 정보를 찾을 수 없습니다.");
+      }
+    } catch (error) {
+      const firebaseError = error as FirebaseError;
+      console.error("로그인 오류:", firebaseError.message);
+      if (firebaseError.code === "auth/user-not-found") {
+        setEmailError("등록되지 않은 이메일입니다.");
+      } else if (firebaseError.code === "auth/wrong-password") {
+        setPasswordError("비밀번호가 일치하지 않습니다.");
+      } else {
+        alert("로그인 중 오류가 발생했습니다. 다시 시도해주세요.");
+      }
+    }
   };
 
   const handleGoogleLogin = () => {

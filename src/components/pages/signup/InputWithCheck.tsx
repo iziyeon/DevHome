@@ -1,5 +1,3 @@
-// src/components/pages/signup/InputWithCheck.tsx
-
 import { ReactNode } from "react";
 
 interface InputWithCheckProps {
@@ -30,21 +28,21 @@ export default function InputWithCheck({
       <label className="label">
         <span className="label-text text-white">{label}</span>
       </label>
-      <div className="flex items-center gap-2">
-        <div className="flex items-center border border-white rounded-full px-4 py-2 flex-grow">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center border border-white rounded-full px-4 py-2 flex-1 min-w-0">
           {icon}
           <input
             type={type}
             value={value}
             onChange={onChange}
             placeholder={placeholder}
-            className="bg-transparent text-white flex-grow focus:outline-none placeholder:text-gray-400"
+            className="bg-transparent text-white w-full focus:outline-none placeholder:text-gray-400"
           />
         </div>
         <button
           type="button"
           onClick={onCheck}
-          className="h-full px-4 btn btn-outline rounded-full text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300 transition whitespace-nowrap"
+          className="px-3 btn btn-outline rounded-full text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300 transition whitespace-nowrap"
         >
           {checkLabel}
         </button>
