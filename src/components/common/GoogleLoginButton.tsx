@@ -6,13 +6,16 @@ import { useUserStore } from "../../stores/useUserStore";
 
 interface Props {
   className?: string;
+  onClick?: () => void;
 }
 
-export default function GoogleLoginButton({ className = "" }: Props) {
+export default function GoogleLoginButton({ className = "", onClick }: Props) {
   const navigate = useNavigate();
 
   const handleGoogleLogin = async () => {
     try {
+      if (onClick) onClick();
+
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const user = result.user;

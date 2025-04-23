@@ -117,6 +117,7 @@ export default function SignupForm({
       </button>
 
       <SignupFooter />
+
       <div className="mt-4">
         <GoogleLoginButton onClick={onGoogleLogin} />
       </div>
