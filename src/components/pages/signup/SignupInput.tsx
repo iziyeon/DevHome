@@ -1,5 +1,3 @@
-// src/components/pages/signup/SignupInput.tsx
-
 import { ReactNode } from "react";
 
 interface SignupInputProps {
@@ -26,14 +24,14 @@ export default function SignupInput({
       <label className="label">
         <span className="label-text text-white">{label}</span>
       </label>
-      <div className="flex items-center border border-white rounded-full px-4 py-2">
+      <div className="flex items-center border border-white rounded-full px-4 py-2 flex-1 min-w-0">
         {icon}
         <input
           type={type}
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className="bg-transparent text-white flex-grow focus:outline-none placeholder:text-gray-400"
+          className="bg-transparent text-white w-full focus:outline-none placeholder:text-gray-400"
         />
       </div>
       {error && <p className="text-red-400 text-sm mt-1">{error}</p>}

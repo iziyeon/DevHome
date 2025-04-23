@@ -1,5 +1,3 @@
-// src/pages/SignUp.tsx
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SignupForm from "../components/pages/signup/SignupForm";
@@ -53,7 +51,7 @@ export default function SignUp() {
 
     if (!isValid) return;
 
-    const username = "hong"; // TODO: Firebase 연동 시 교체
+    const username = "hong";
     navigate(`/mypage/${username}`);
   };
 
@@ -70,7 +68,7 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-start pt-24 px-4">
+    <div className="min-h-screen flex justify-center items-center p-4">
       <SignupForm
         name={name}
         nickname={nickname}
