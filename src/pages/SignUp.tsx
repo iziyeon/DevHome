@@ -1,5 +1,11 @@
+// src/pages/SignUp.tsx
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { FirebaseError } from "firebase/app";
+import { auth, db } from "../firebase";
 import SignupForm from "../components/pages/signup/SignupForm";
 
 export default function SignUp() {
@@ -15,7 +21,7 @@ export default function SignUp() {
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     let isValid = true;
@@ -51,8 +57,31 @@ export default function SignUp() {
 
     if (!isValid) return;
 
-    const username = "hong";
-    navigate(`/mypage/${username}`);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+
+      await setDoc(doc(db, "users", user.uid), {
+        name,
+        nickname,
+        email,
+        createdAt: new Date(),
+      });
+
+      navigate(`/mypage/${nickname}`);
+    } catch (error) {
+      const firebaseError = error as FirebaseError;
+      console.error("회원가입 오류:", firebaseError.message);
+      if (firebaseError.code === "auth/email-already-in-use") {
+        setEmailError("이미 사용 중인 이메일입니다.");
+      } else {
+        alert("회원가입 중 오류가 발생했습니다. 다시 시도해주세요.");
+      }
+    }
   };
 
   const handleNicknameCheck = () => {
@@ -68,7 +97,7 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center p-4">
+    <div className="min-h-screen flex justify-center items-start pt-24 px-4">
       <SignupForm
         name={name}
         nickname={nickname}
