@@ -1,5 +1,6 @@
 // src/components/pages/home/HeroSection.tsx
 
+import { useAuth } from "../../../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import GoogleLoginButton from "../../common/GoogleLoginButton";
@@ -10,7 +11,8 @@ export default function HeroSection() {
   const [index, setIndex] = useState(0);
   const isTypingDone = index >= fullText.length;
 
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
 
   useEffect(() => {
     if (index < fullText.length) {
@@ -45,10 +47,8 @@ export default function HeroSection() {
 
         {!isLoggedIn && (
           <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 max-w-xs sm:max-w-none mx-auto w-full">
-            <GoogleLoginButton
-              onClick={() => console.log("🟡 Google 로그인 예정")}
-              className="w-full sm:w-auto px-5 py-3"
-            />
+            <GoogleLoginButton className="w-full sm:w-auto px-5 py-3" />
+
             <Link
               to="/login"
               className="btn btn-outline w-full sm:w-auto rounded-full text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300 transition px-5 py-3"

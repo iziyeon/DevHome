@@ -1,5 +1,10 @@
+// src/pages/SignUp.tsx
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
+import { auth } from "../firebase";
 import SignupForm from "../components/pages/signup/SignupForm";
 
 export default function SignUp() {
@@ -12,11 +17,17 @@ export default function SignUp() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmError, setConfirmError] = useState("");
+  const [firebaseError, setFirebaseError] = useState("");
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    setEmailError("");
+    setPasswordError("");
+    setConfirmError("");
+    setFirebaseError("");
 
     let isValid = true;
 
@@ -26,8 +37,6 @@ export default function SignUp() {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setEmailError("올바른 이메일 형식이 아닙니다.");
       isValid = false;
-    } else {
-      setEmailError("");
     }
 
     if (!password.trim()) {
@@ -38,21 +47,26 @@ export default function SignUp() {
         "비밀번호는 영문과 숫자를 포함해 8자 이상이어야 합니다."
       );
       isValid = false;
-    } else {
-      setPasswordError("");
     }
 
     if (passwordConfirm !== password) {
       setConfirmError("비밀번호가 일치하지 않습니다.");
       isValid = false;
-    } else {
-      setConfirmError("");
     }
 
     if (!isValid) return;
 
-    const username = "hong";
-    navigate(`/mypage/${username}`);
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      navigate("/"); // 회원가입 성공 시 홈으로 이동
+    } catch (error: unknown) {
+      const firebaseErr = error as FirebaseError;
+      if (firebaseErr.code === "auth/email-already-in-use") {
+        setFirebaseError("이미 사용 중인 이메일입니다.");
+      } else {
+        setFirebaseError("회원가입 중 오류가 발생했습니다.");
+      }
+    }
   };
 
   const handleNicknameCheck = () => {
@@ -68,26 +82,31 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center p-4">
-      <SignupForm
-        name={name}
-        nickname={nickname}
-        email={email}
-        password={password}
-        passwordConfirm={passwordConfirm}
-        emailError={emailError}
-        passwordError={passwordError}
-        confirmError={confirmError}
-        onNameChange={(e) => setName(e.target.value)}
-        onNicknameChange={(e) => setNickname(e.target.value)}
-        onEmailChange={(e) => setEmail(e.target.value)}
-        onPasswordChange={(e) => setPassword(e.target.value)}
-        onPasswordConfirmChange={(e) => setPasswordConfirm(e.target.value)}
-        onSubmit={handleSubmit}
-        onNicknameCheck={handleNicknameCheck}
-        onEmailCheck={handleEmailCheck}
-        onGoogleLogin={handleGoogleLogin}
-      />
+    <div className="min-h-screen flex justify-center items-start pt-24 px-4">
+      <div className="w-full max-w-md">
+        {firebaseError && (
+          <p className="text-red-400 text-center mb-4">{firebaseError}</p>
+        )}
+        <SignupForm
+          name={name}
+          nickname={nickname}
+          email={email}
+          password={password}
+          passwordConfirm={passwordConfirm}
+          emailError={emailError}
+          passwordError={passwordError}
+          confirmError={confirmError}
+          onNameChange={(e) => setName(e.target.value)}
+          onNicknameChange={(e) => setNickname(e.target.value)}
+          onEmailChange={(e) => setEmail(e.target.value)}
+          onPasswordChange={(e) => setPassword(e.target.value)}
+          onPasswordConfirmChange={(e) => setPasswordConfirm(e.target.value)}
+          onSubmit={handleSubmit}
+          onNicknameCheck={handleNicknameCheck}
+          onEmailCheck={handleEmailCheck}
+          onGoogleLogin={handleGoogleLogin}
+        />
+      </div>
     </div>
   );
 }

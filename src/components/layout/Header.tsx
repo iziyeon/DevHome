@@ -1,24 +1,29 @@
 // src/components/layout/Header.tsx
+
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/layout/logo.png";
-
-const isLoggedIn = false;
-const username = "yeon";
-
-const navLinks = [
-  { to: () => "/community", label: "Community", always: true },
-  { to: () => "/resume", label: "Resume", authOnly: true },
-  {
-    to: (username?: string) => (username ? `/mypage/${username}` : "/mypage"),
-    label: "Mypage",
-    authOnly: true,
-  },
-];
+import { useAuth } from "../../contexts/AuthContext";
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase";
 
 export default function Header() {
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
+  const username = user?.displayName || "me";
+
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const navLinks = [
+    { to: () => "/community", label: "Community", always: true },
+    { to: () => "/resume", label: "Resume", authOnly: true },
+    {
+      to: (username?: string) => (username ? `/mypage/${username}` : "/mypage"),
+      label: "Mypage",
+      authOnly: true,
+    },
+  ];
 
   const isCurrent = (path: string) =>
     location.pathname === path ? "text-indigo-300 font-bold underline" : "";
@@ -50,7 +55,10 @@ export default function Header() {
     if (isLoggedIn) {
       return (
         <button
-          onClick={isMobile ? () => setIsMenuOpen(false) : undefined}
+          onClick={() => {
+            if (isMobile) setIsMenuOpen(false);
+            signOut(auth);
+          }}
           className={`${baseClass} ${isMobile ? "w-full text-left" : "btn-sm"}`}
         >
           Logout
@@ -95,9 +103,7 @@ export default function Header() {
           </Link>
           <div className="hidden md:flex gap-4">{renderNavLinks()}</div>
         </div>
-
         <div className="hidden md:flex gap-2">{renderAuthButtons()}</div>
-
         <div className="md:hidden">
           <button
             className="btn btn-ghost"
