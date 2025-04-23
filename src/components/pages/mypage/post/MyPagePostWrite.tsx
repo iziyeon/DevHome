@@ -1,7 +1,9 @@
+// src/pages/MyPagePostWrite.tsx
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { FilePlus } from "lucide-react";
-import { myPageDummyPosts } from "../../../../data/MyPageDummyPosts";
+import { useUserStore } from "../../../../stores/useUserStore";
+import { savePostToFirestore } from "../../../../services/firestore/posts";
 
 const categoryOptions = [
   { value: "tech", label: "기술 노트" },
@@ -21,27 +23,31 @@ export default function MyPagePostWrite() {
   const [category, setCategory] = useState("");
   const [content, setContent] = useState("");
 
+  const user = useUserStore((state) => state.user);
+
   useEffect(() => {
     if (!isEditMode) return;
-    const existingPost = myPageDummyPosts.find((p) => p.id === postId);
-    if (existingPost) {
-      setTitle(existingPost.title);
-      setCategory(existingPost.category);
-      setContent(existingPost.content || "");
-    }
+    // TODO: Firestore에서 수정용 데이터 불러오기
   }, [isEditMode, postId]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = { id: postId || "new", title, category, content };
-
-    if (isEditMode) {
-      console.log("마이페이지 글 수정됨:", formData);
-    } else {
-      console.log("마이페이지 글 작성됨:", formData);
+    if (!user?.uid || !user?.nickname) {
+      alert("로그인이 필요합니다.");
+      return;
     }
 
-    navigate(`/mypage/${username}`);
+    const savedId = await savePostToFirestore({
+      id: postId || undefined,
+      title,
+      category,
+      content,
+      uid: user.uid,
+      nickname: user.nickname,
+      isMyPagePost: true,
+    });
+
+    navigate(`/mypage/${username}/post/${savedId}`);
   };
 
   return (
