@@ -1,3 +1,5 @@
+// src/components/pages/home/FeatureSection.tsx
+
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -69,11 +71,7 @@ export default function FeatureSection() {
         >
           {topFeatures.map(({ title, icon, description }) => (
             <SwiperSlide key={title} className="flex justify-center">
-              <div
-                className="w-full max-w-[540px] min-w-[300px] h-[480px]
-                           bg-white/5 border border-white/10 rounded-xl p-6 shadow-md flex flex-col gap-4
-                           hover:border-indigo-300 hover:shadow-[0_0_12px_#6366f1] transition-all duration-300"
-              >
+              <div className="w-full max-w-[540px] min-w-[300px] h-[480px] bg-white/5 border border-white/10 rounded-xl p-6 shadow-md flex flex-col gap-4 hover:border-indigo-300 hover:shadow-[0_0_12px_#6366f1] transition-all duration-300">
                 <div className="flex items-center gap-2">
                   {icon}
                   <h3 className="text-lg font-bold">{title}</h3>
