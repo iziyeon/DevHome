@@ -11,9 +11,12 @@ import {
   Twitter,
   Instagram,
   Notebook,
+  Globe,
 } from "lucide-react";
 import SearchInput from "../../../common/SearchInput";
 import defaultProfile from "../../../../assets/layout/default.jpg";
+import { useUserStore } from "../../../../stores/useUserStore";
+import { JSX } from "react";
 
 interface MyProfileSidebarProps {
   username: string;
@@ -26,30 +29,18 @@ const CATEGORIES = [
   { key: "project", label: "프로젝트", icon: <BookText size={16} /> },
 ];
 
-const SNS_LINKS = [
-  {
-    label: "GitHub",
-    icon: <Github size={18} />,
-    url: "https://github.com/yeon",
-  },
-  {
-    label: "Notion",
-    icon: <Notebook size={18} />,
-    url: "https://notion.so/yeon",
-  },
-  {
-    label: "Twitter",
-    icon: <Twitter size={18} />,
-    url: "https://twitter.com/yourhandle",
-  },
-  {
-    label: "Instagram",
-    icon: <Instagram size={18} />,
-    url: "https://instagram.com/yourid",
-  },
-];
+const iconMap: { [key: string]: JSX.Element } = {
+  github: <Github size={18} />,
+  notion: <Notebook size={18} />,
+  twitter: <Twitter size={18} />,
+  x: <Twitter size={18} />,
+  instagram: <Instagram size={18} />,
+  blog: <Globe size={18} />,
+};
 
 export default function MyProfileSidebar({ username }: MyProfileSidebarProps) {
+  const user = useUserStore((state) => state.user);
+
   return (
     <aside className="w-full md:w-[240px] text-white">
       <div className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-6">
@@ -112,18 +103,21 @@ export default function MyProfileSidebar({ username }: MyProfileSidebarProps) {
         </div>
 
         <div className="flex justify-center gap-4 pt-2">
-          {SNS_LINKS.map((link) => (
-            <a
-              key={link.label}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-400 hover:text-indigo-300 transition"
-              aria-label={link.label}
-            >
-              {link.icon}
-            </a>
-          ))}
+          {user?.snsLinks &&
+            Object.entries(user.snsLinks).map(([key, url]) =>
+              url && iconMap[key] ? (
+                <a
+                  key={key}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-indigo-300 transition"
+                  aria-label={key}
+                >
+                  {iconMap[key]}
+                </a>
+              ) : null
+            )}
         </div>
 
         <div className="pt-2 text-center">

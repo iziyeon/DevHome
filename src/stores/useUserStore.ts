@@ -7,6 +7,16 @@ interface UserInfo {
   name: string;
   nickname: string;
   email: string;
+  photoURL?: string;
+  intro?: string;
+  snsLinks?: {
+    github?: string;
+    notion?: string;
+    blog?: string;
+    instagram?: string;
+    x?: string;
+    [key: string]: string | undefined;
+  };
 }
 
 interface UserState {

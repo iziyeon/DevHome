@@ -1,7 +1,16 @@
 import { Link, useLocation } from "react-router-dom";
-import { GithubIcon, TwitterIcon, InstagramIcon, BookIcon } from "lucide-react";
+import { Github, Twitter, Instagram, BookOpen, Globe } from "lucide-react";
 import logo from "../../assets/layout/logo.png";
 import { useUserStore } from "../../stores/useUserStore";
+import type { JSX } from "react";
+
+const iconMap: { [key: string]: JSX.Element } = {
+  github: <Github className="w-5 h-5" />,
+  instagram: <Instagram className="w-5 h-5" />,
+  x: <Twitter className="w-5 h-5" />,
+  notion: <BookOpen className="w-5 h-5" />,
+  blog: <Globe className="w-5 h-5" />,
+};
 
 export default function Footer() {
   const location = useLocation();
@@ -22,13 +31,6 @@ export default function Footer() {
     { href: "https://notion.so", label: "Notion" },
   ];
 
-  const snsIcons = [
-    { href: "https://github.com", icon: GithubIcon },
-    { href: "https://twitter.com", icon: TwitterIcon },
-    { href: "https://instagram.com", icon: InstagramIcon },
-    { href: "https://notion.so", icon: BookIcon },
-  ];
-
   return (
     <footer className="bg-transparent text-white w-full py-12 px-4">
       <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-start text-sm">
@@ -38,6 +40,7 @@ export default function Footer() {
           </Link>
           <p className="text-white/70 text-sm">© 2025 DevHome</p>
         </div>
+
         <div className="flex flex-col items-center gap-2 text-base">
           {navLinks.map(({ to, label }) => {
             const isActive = location.pathname === to;
@@ -54,6 +57,7 @@ export default function Footer() {
             );
           })}
         </div>
+
         <div className="flex flex-col items-center md:items-end gap-2 text-base">
           {externalLinks.map(({ href, label }) => (
             <a
@@ -67,17 +71,20 @@ export default function Footer() {
             </a>
           ))}
           <div className="flex gap-4 mt-3">
-            {snsIcons.map(({ href, icon: Icon }) => (
-              <a
-                key={href}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white/60 hover:text-indigo-300 transition"
-              >
-                <Icon className="w-5 h-5" />
-              </a>
-            ))}
+            {user?.snsLinks &&
+              Object.entries(user.snsLinks).map(([key, url]) =>
+                url && iconMap[key] ? (
+                  <a
+                    key={key}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white/60 hover:text-indigo-300 transition"
+                  >
+                    {iconMap[key]}
+                  </a>
+                ) : null
+              )}
           </div>
         </div>
       </div>
