@@ -1,5 +1,3 @@
-// src/components/pages/login/LoginForm.tsx
-
 import { LogInIcon, MailIcon, LockIcon } from "lucide-react";
 import LoginInput from "./LoginInput";
 import LoginFooter from "./LoginFooter";
