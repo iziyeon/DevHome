@@ -12,7 +12,6 @@ export default function Header() {
 
   const user = useUserStore((state) => state.user);
   const clearUser = useUserStore((state) => state.clearUser);
-
   const isLoggedIn = Boolean(user);
 
   const isCurrent = (path: string) =>
@@ -48,7 +47,7 @@ export default function Header() {
           onClick={isMobile ? () => setIsMenuOpen(false) : undefined}
           className={`btn btn-ghost ${
             isMobile ? "text-left justify-start" : "text-base"
-          } hover:underline ${isCurrent(to)}`}
+          } hover:underline hover:text-indigo-300 ${isCurrent(to)}`}
         >
           {label}
         </Link>
@@ -102,16 +101,21 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full bg-transparent text-white">
-      <div className="navbar px-6 relative z-50">
-        <div className="flex flex-1 items-center gap-6">
-          <Link to="/" className="btn btn-ghost text-xl">
-            <img src={logo} alt="DevHome Logo" className="h-8 w-auto" />
+    <header className="w-full bg-transparent text-white z-50">
+      <div className="navbar px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex-1 flex items-center gap-6">
+          <Link
+            to="/"
+            className="btn btn-ghost text-xl flex items-center gap-2"
+          >
+            <img src={logo} alt="DevHome Logo" className="h-8 w-auto sm:h-9" />
           </Link>
           <div className="hidden md:flex gap-4">{renderNavLinks()}</div>
         </div>
 
-        <div className="hidden md:flex gap-2">{renderAuthButtons()}</div>
+        <div className="hidden md:flex gap-3 items-center">
+          {renderAuthButtons()}
+        </div>
 
         <div className="md:hidden">
           <button
@@ -145,10 +149,11 @@ export default function Header() {
         </div>
       </div>
 
+      {/* 모바일 메뉴 */}
       <div
         className={`transition-all duration-300 ease-in-out overflow-hidden md:hidden ${
           isMenuOpen ? "max-h-[500px] py-4" : "max-h-0 py-0"
-        } bg-[#1e1e2e] text-white border-t border-[#2d2d3a] px-6 flex flex-col gap-3`}
+        } bg-[#1e1e2e] border-t border-[#2d2d3a] px-6 flex flex-col gap-3`}
       >
         {renderNavLinks(true)}
         {renderAuthButtons(true)}
