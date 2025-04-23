@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/layout/logo.png";
 import { useUserStore } from "../../stores/useUserStore";
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase";
 
 export default function Header() {
   const location = useLocation();
@@ -10,6 +12,7 @@ export default function Header() {
 
   const user = useUserStore((state) => state.user);
   const clearUser = useUserStore((state) => state.clearUser);
+
   const isLoggedIn = Boolean(user);
 
   const isCurrent = (path: string) =>
@@ -25,9 +28,14 @@ export default function Header() {
     },
   ];
 
-  const handleLogout = () => {
-    clearUser();
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      clearUser();
+      navigate("/");
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+    }
   };
 
   const renderNavLinks = (isMobile = false) =>
