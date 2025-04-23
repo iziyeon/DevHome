@@ -1,9 +1,7 @@
-// src/components/pages/home/HeroSection.tsx
-
-import { useAuth } from "../../../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import GoogleLoginButton from "../../common/GoogleLoginButton";
+import { useUserStore } from "../../../stores/useUserStore";
 
 export default function HeroSection() {
   const fullText = "개발자의 이야기를 담는 집\nDevHome";
@@ -11,8 +9,7 @@ export default function HeroSection() {
   const [index, setIndex] = useState(0);
   const isTypingDone = index >= fullText.length;
 
-  const { user } = useAuth();
-  const isLoggedIn = !!user;
+  const user = useUserStore((state) => state.user);
 
   useEffect(() => {
     if (index < fullText.length) {
@@ -45,10 +42,9 @@ export default function HeroSection() {
           공간
         </p>
 
-        {!isLoggedIn && (
+        {!user && (
           <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 max-w-xs sm:max-w-none mx-auto w-full">
             <GoogleLoginButton className="w-full sm:w-auto px-5 py-3" />
-
             <Link
               to="/login"
               className="btn btn-outline w-full sm:w-auto rounded-full text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300 transition px-5 py-3"

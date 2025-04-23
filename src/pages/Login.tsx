@@ -1,11 +1,10 @@
-// src/pages/Login.tsx
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
 import { auth, db } from "../firebase";
+import { useUserStore } from "../stores/useUserStore";
 import LoginForm from "../components/pages/login/LoginForm";
 
 export default function Login() {
@@ -58,7 +57,12 @@ export default function Login() {
 
       if (docSnap.exists()) {
         const userData = docSnap.data();
-        console.log("유저 정보:", userData);
+        useUserStore.getState().setUser({
+          uid: user.uid,
+          name: userData.name,
+          nickname: userData.nickname,
+          email: userData.email,
+        });
         navigate(`/mypage/${userData.nickname}`);
       } else {
         console.warn("Firestore에 유저 정보가 없습니다.");

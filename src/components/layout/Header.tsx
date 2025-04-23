@@ -1,51 +1,50 @@
-// src/components/layout/Header.tsx
-
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/layout/logo.png";
-import { useAuth } from "../../contexts/AuthContext";
-import { signOut } from "firebase/auth";
-import { auth } from "../../firebase";
+import { useUserStore } from "../../stores/useUserStore";
 
 export default function Header() {
-  const { user } = useAuth();
-  const isLoggedIn = !!user;
-  const username = user?.displayName || "me";
-
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const navLinks = [
-    { to: () => "/community", label: "Community", always: true },
-    { to: () => "/resume", label: "Resume", authOnly: true },
-    {
-      to: (username?: string) => (username ? `/mypage/${username}` : "/mypage"),
-      label: "Mypage",
-      authOnly: true,
-    },
-  ];
+  const user = useUserStore((state) => state.user);
+  const clearUser = useUserStore((state) => state.clearUser);
+  const isLoggedIn = Boolean(user);
 
   const isCurrent = (path: string) =>
     location.pathname === path ? "text-indigo-300 font-bold underline" : "";
 
+  const navLinks = [
+    { to: "/community", label: "Community", show: true },
+    { to: "/resume", label: "Resume", show: isLoggedIn },
+    {
+      to: `/mypage/${user?.nickname || "mypage"}`,
+      label: "Mypage",
+      show: isLoggedIn,
+    },
+  ];
+
+  const handleLogout = () => {
+    clearUser();
+    navigate("/");
+  };
+
   const renderNavLinks = (isMobile = false) =>
-    navLinks.map(({ to, label, always, authOnly }) => {
-      if (always || (authOnly && isLoggedIn)) {
-        const path = to(username);
-        return (
-          <Link
-            key={label}
-            to={path}
-            onClick={isMobile ? () => setIsMenuOpen(false) : undefined}
-            className={`btn btn-ghost ${
-              isMobile ? "text-left justify-start" : "text-base"
-            } hover:underline ${isCurrent(path)}`}
-          >
-            {label}
-          </Link>
-        );
-      }
-      return null;
+    navLinks.map(({ to, label, show }) => {
+      if (!show) return null;
+      return (
+        <Link
+          key={label}
+          to={to}
+          onClick={isMobile ? () => setIsMenuOpen(false) : undefined}
+          className={`btn btn-ghost ${
+            isMobile ? "text-left justify-start" : "text-base"
+          } hover:underline ${isCurrent(to)}`}
+        >
+          {label}
+        </Link>
+      );
     });
 
   const renderAuthButtons = (isMobile = false) => {
@@ -56,8 +55,8 @@ export default function Header() {
       return (
         <button
           onClick={() => {
+            handleLogout();
             if (isMobile) setIsMenuOpen(false);
-            signOut(auth);
           }}
           className={`${baseClass} ${isMobile ? "w-full text-left" : "btn-sm"}`}
         >
@@ -103,7 +102,9 @@ export default function Header() {
           </Link>
           <div className="hidden md:flex gap-4">{renderNavLinks()}</div>
         </div>
+
         <div className="hidden md:flex gap-2">{renderAuthButtons()}</div>
+
         <div className="md:hidden">
           <button
             className="btn btn-ghost"
