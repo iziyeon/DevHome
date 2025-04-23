@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/layout/logo.png";
 
-const isLoggedIn = true;
+const isLoggedIn = false;
 const username = "yeon";
 
 const navLinks = [

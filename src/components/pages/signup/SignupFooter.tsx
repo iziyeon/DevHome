@@ -1,17 +1,15 @@
-// src/components/pages/signup/SignupFooter.tsx
-
 import { Link } from "react-router-dom";
 
 export default function SignupFooter() {
   return (
-    <p className="text-sm text-white text-center mt-2">
-      이미 계정이 있으신가요?{" "}
+    <div className="mt-6 text-center text-sm text-white">
+      <p className="mb-1">이미 계정이 있으신가요?</p>
       <Link
         to="/login"
-        className="underline text-white hover:text-indigo-300 transition"
+        className="inline-block underline underline-offset-4 text-white hover:text-indigo-300 transition"
       >
-        로그인
+        로그인하러 가기
       </Link>
-    </p>
+    </div>
   );
 }
