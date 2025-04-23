@@ -1,9 +1,9 @@
 // src/pages/PostWrite.tsx
-
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { FilePlus } from "lucide-react";
-import { communityDummyPosts } from "../data/CommunityDummyPosts";
+import { useUserStore } from "../stores/useUserStore";
+import { savePostToFirestore } from "../services/firestore/posts";
 
 const categoryOptions = [
   { value: "기능구현팁", label: "기능구현팁" },
@@ -25,27 +25,31 @@ export default function PostWrite() {
   const [category, setCategory] = useState("");
   const [content, setContent] = useState("");
 
+  const user = useUserStore((state) => state.user);
+
   useEffect(() => {
     if (!isEditMode) return;
-    const existingPost = communityDummyPosts.find((p) => p.id === postId);
-    if (existingPost) {
-      setTitle(existingPost.title);
-      setCategory(existingPost.category);
-      setContent(existingPost.content || "");
-    }
+    // TODO: 글 수정 시 Firestore에서 기존 데이터 불러오기 (아직은 dummy)
   }, [isEditMode, postId]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = { id: postId || "new", title, category, content };
-
-    if (isEditMode) {
-      console.log("커뮤니티 글 수정됨:", formData);
-    } else {
-      console.log("커뮤니티 글 작성됨:", formData);
+    if (!user?.uid || !user?.nickname) {
+      alert("로그인이 필요합니다.");
+      return;
     }
 
-    navigate(-1);
+    const savedId = await savePostToFirestore({
+      id: postId || undefined,
+      title,
+      category,
+      content,
+      uid: user.uid,
+      nickname: user.nickname,
+      isMyPagePost: false,
+    });
+
+    navigate(`/community/post/${savedId}`);
   };
 
   return (
