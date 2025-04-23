@@ -46,12 +46,12 @@ export default function MyProfileSidebar({ username }: MyProfileSidebarProps) {
       <div className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-6">
         <div className="text-center space-y-2">
           <img
-            src={defaultProfile}
+            src={user?.profileImage || defaultProfile}
             alt="프로필 이미지"
             className="w-24 h-24 rounded-full mx-auto object-cover"
           />
-          <h2 className="text-lg font-bold">{username}</h2>
-          <p className="text-sm text-gray-300">기록하고 공유하며 성장합니다.</p>
+          <h2 className="text-lg font-bold">{user?.nickname || username}</h2>
+          <p className="text-sm text-gray-300">{user?.bio}</p>
         </div>
 
         <SearchInput navigateTo={`/mypage/${username}/search`} />

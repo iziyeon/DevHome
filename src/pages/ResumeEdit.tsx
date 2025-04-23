@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUserStore } from "../stores/useUserStore";
 import ResumeEditProfileForm from "../components/pages/resume/edit/ResumeEditProfileForm";
 import ResumeEditTechStackForm from "../components/pages/resume/edit/ResumeEditTechStackForm";
 import ResumeEditProjectsForm from "../components/pages/resume/edit/ResumeEditProjectsForm";
@@ -8,14 +9,15 @@ import { ResumeData } from "../types/resumeTypes";
 
 export default function ResumeEdit() {
   const navigate = useNavigate();
+  const user = useUserStore((state) => state.user);
 
   const [resumeData, setResumeData] = useState<ResumeData>({
     profile: {
-      name: "",
-      role: "",
-      email: "",
-      tagline: "",
-      image: "",
+      name: user?.name || "",
+      role: user?.position || "",
+      email: user?.email || "",
+      tagline: user?.bio || "",
+      image: user?.profileImage || "",
     },
     techStack: {
       frontend: [],

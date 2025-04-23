@@ -1,12 +1,21 @@
 import { useRef, useState, ChangeEvent } from "react";
+import { useUserStore } from "../../../../stores/useUserStore";
 import defaultProfile from "../../../../assets/layout/default.jpg";
 
 export default function EditProfileInfoAndPhoto() {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = useState<string>(defaultProfile);
-  const [nickname, setNickname] = useState("홍길동");
-  const [bio, setBio] = useState("기록하고 공유하며 성장합니다.");
-  const [position, setPosition] = useState("프론트엔드");
+  const user = useUserStore((state) => state.user);
+  const setUser = useUserStore((state) => state.setUser);
+
+  const [preview, setPreview] = useState<string>(
+    user?.profileImage || defaultProfile
+  );
+  const [nickname, setNickname] = useState(user?.nickname || "");
+  const [bio, setBio] = useState(user?.bio || "");
+  const [position, setPosition] = useState(user?.position || "프론트엔드");
+  const [customPosition, setCustomPosition] = useState("");
+
+  const isCustom = position === "기타";
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -21,7 +30,18 @@ export default function EditProfileInfoAndPhoto() {
   };
 
   const triggerFileInput = () => fileInputRef.current?.click();
-  const handleSave = () => alert("프로필이 저장되었습니다.");
+
+  const handleSave = () => {
+    if (!user) return;
+    setUser({
+      ...user,
+      nickname,
+      bio,
+      profileImage: preview,
+      position: isCustom ? customPosition : position,
+    });
+    alert("프로필이 저장되었습니다.");
+  };
 
   return (
     <div className="space-y-6">
@@ -59,6 +79,7 @@ export default function EditProfileInfoAndPhoto() {
               className="input input-bordered w-full bg-white/10 text-white border-white/10"
             />
           </div>
+
           <div>
             <label className="mb-1 block text-sm text-gray-300">소개</label>
             <textarea
@@ -68,6 +89,7 @@ export default function EditProfileInfoAndPhoto() {
               className="textarea textarea-bordered w-full bg-white/10 text-white border-white/10"
             />
           </div>
+
           <div>
             <label className="mb-1 block text-sm text-gray-300">포지션</label>
             <select
@@ -78,9 +100,21 @@ export default function EditProfileInfoAndPhoto() {
               <option className="text-black">프론트엔드</option>
               <option className="text-black">백엔드</option>
               <option className="text-black">풀스택</option>
-              <option className="text-black">기획자</option>
-              <option className="text-black">디자이너</option>
+              <option className="text-black">모바일</option>
+              <option className="text-black">DevOps</option>
+              <option className="text-black">데이터</option>
+              <option className="text-black">기타</option>
             </select>
+
+            {isCustom && (
+              <input
+                type="text"
+                placeholder="직접 입력"
+                value={customPosition}
+                onChange={(e) => setCustomPosition(e.target.value)}
+                className="input input-bordered w-full mt-2 bg-white/10 text-white border-white/10"
+              />
+            )}
           </div>
         </div>
       </div>

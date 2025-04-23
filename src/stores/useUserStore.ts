@@ -1,5 +1,3 @@
-// src/stores/useUserStore.ts
-
 import { create } from "zustand";
 
 interface UserInfo {
@@ -7,8 +5,11 @@ interface UserInfo {
   name: string;
   nickname: string;
   email: string;
-  photoURL?: string;
-  intro?: string;
+
+  profileImage?: string;
+  bio?: string;
+  position?: string;
+
   snsLinks?: {
     github?: string;
     notion?: string;
