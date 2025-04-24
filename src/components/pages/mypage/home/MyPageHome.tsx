@@ -6,6 +6,7 @@ import MyGuestbookList from "../guestbook/MyGuestbookList";
 import MyQuickLinksPanel from "../quicklinks/MyQuickLinksPanel";
 import { myPageDummyPosts } from "../../../../data/MyPageDummyPosts";
 import type { QuickLink } from "../quicklinks/MyQuickLinksPanel";
+import { useUserStore } from "../../../../stores/useUserStore";
 
 interface OutletContext {
   username: string;
@@ -31,6 +32,9 @@ export default function MyPageHome() {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 5);
 
+  const user = useUserStore((state) => state.user);
+  const intro = user?.intro;
+
   return (
     <div className="space-y-8 md:space-y-10">
       <div className="flex items-center justify-between">
@@ -44,11 +48,13 @@ export default function MyPageHome() {
         </button>
       </div>
 
-      <MyIntroBanner
-        interest="취업"
-        book="모던 자바스크립트 Deep Dive"
-        goal="한 줄 커밋이라도 하기"
-      />
+      {intro && (
+        <MyIntroBanner
+          interest={intro.interest}
+          book={intro.book}
+          goal={intro.goal}
+        />
+      )}
 
       <MyPostList posts={filteredPosts} />
 
