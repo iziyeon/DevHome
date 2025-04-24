@@ -19,7 +19,8 @@ export default function EditSnsLinks() {
   };
 
   const handleSave = async () => {
-    if (!user) return;
+    if (!user?.uid) return;
+
     const userRef = doc(db, "users", user.uid);
     const newData = { ...user, snsLinks, updatedAt: new Date() };
 
