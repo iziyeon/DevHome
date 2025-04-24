@@ -1,16 +1,10 @@
-// src/pages/MyPagePostWrite.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { FilePlus } from "lucide-react";
 import { useUserStore } from "../../../../stores/useUserStore";
 import { savePostToFirestore } from "../../../../services/firestore/posts";
-
-const categoryOptions = [
-  { value: "tech", label: "기술 노트" },
-  { value: "troubleshooting", label: "트러블슈팅" },
-  { value: "daily", label: "Daily" },
-  { value: "project", label: "프로젝트" },
-];
+import { getDoc, doc } from "firebase/firestore";
+import { db } from "../../../../firebase";
 
 export default function MyPagePostWrite() {
   const { username } = useParams<{ username: string }>();
@@ -25,9 +19,35 @@ export default function MyPagePostWrite() {
 
   const user = useUserStore((state) => state.user);
 
+  // ✅ 유저의 categoryLabels를 옵션 배열로 변환
+  const categoryOptions = useMemo(() => {
+    return user?.categoryLabels
+      ? Object.entries(user.categoryLabels).map(([value, label]) => ({
+          value,
+          label,
+        }))
+      : [];
+  }, [user?.categoryLabels]);
+
+  // ✅ 수정 모드일 때 게시글 데이터를 불러옴
   useEffect(() => {
-    if (!isEditMode) return;
-    // TODO: Firestore에서 수정용 데이터 불러오기
+    const fetchPost = async () => {
+      if (!isEditMode || !postId) return;
+      try {
+        const ref = doc(db, "mypagePosts", postId);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          const data = snap.data();
+          setTitle(data.title || "");
+          setCategory(data.category || "");
+          setContent(data.content || "");
+        }
+      } catch (error) {
+        console.error("❌ 게시글 불러오기 실패:", error);
+      }
+    };
+
+    fetchPost();
   }, [isEditMode, postId]);
 
   const handleSubmit = async (e: React.FormEvent) => {

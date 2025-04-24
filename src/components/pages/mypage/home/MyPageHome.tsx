@@ -4,9 +4,10 @@ import MyIntroBanner from "./MyIntroBanner";
 import MyPostList from "./MyPostList";
 import MyGuestbookList from "../guestbook/MyGuestbookList";
 import MyQuickLinksPanel from "../quicklinks/MyQuickLinksPanel";
-import { myPageDummyPosts } from "../../../../data/MyPageDummyPosts";
 import type { QuickLink } from "../quicklinks/MyQuickLinksPanel";
 import { useUserStore } from "../../../../stores/useUserStore";
+import { useMyPagePosts } from "../../../../hooks/useMyPagePosts";
+import { useMemo } from "react";
 
 interface OutletContext {
   username: string;
@@ -17,23 +18,39 @@ export default function MyPageHome() {
   const navigate = useNavigate();
   const location = useLocation();
   const { quickLinks, username } = useOutletContext<OutletContext>();
+  const user = useUserStore((state) => state.user);
+  const intro = user?.intro;
 
   const searchParam = new URLSearchParams(location.search).get("search");
 
-  const filteredPosts = myPageDummyPosts
-    .filter((post) => {
-      if (!searchParam) return true;
-      const keyword = searchParam.toLowerCase();
-      return (
-        post.title.toLowerCase().includes(keyword) ||
-        post.content.toLowerCase().includes(keyword)
-      );
-    })
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 5);
+  // 🔥 uid가 없는 경우엔 쿼리 실행 안 함
+  const { posts, loading } = useMyPagePosts(user?.uid || "");
 
-  const user = useUserStore((state) => state.user);
-  const intro = user?.intro;
+  const filteredPosts = useMemo(() => {
+    if (!user?.uid) return []; // 🔒 uid 없으면 빈 배열 반환
+    const keyword = searchParam?.toLowerCase() || "";
+    return posts
+      .filter((post) => {
+        if (!keyword) return true;
+        return (
+          post.title.toLowerCase().includes(keyword) ||
+          post.content.toLowerCase().includes(keyword)
+        );
+      })
+      .slice(0, 5)
+      .map((post) => ({
+        ...post,
+        date: post.createdAt?.toDate().toLocaleDateString("ko-KR") || "",
+      }));
+  }, [posts, searchParam, user?.uid]);
+
+  if (!user?.uid) {
+    return (
+      <p className="text-sm text-gray-400 py-10 text-center">
+        유저 정보를 불러오는 중입니다...
+      </p>
+    );
+  }
 
   return (
     <div className="space-y-8 md:space-y-10">
@@ -56,7 +73,13 @@ export default function MyPageHome() {
         />
       )}
 
-      <MyPostList posts={filteredPosts} />
+      {!loading && filteredPosts.length > 0 && (
+        <MyPostList posts={filteredPosts} />
+      )}
+
+      {!loading && filteredPosts.length === 0 && (
+        <p className="text-sm text-gray-400">작성한 글이 없습니다.</p>
+      )}
 
       <MyGuestbookList username={username} />
 

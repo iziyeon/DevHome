@@ -1,5 +1,14 @@
 import { Link, useParams } from "react-router-dom";
-import { Post } from "../../../../data/MyPageDummyPosts";
+
+interface Post {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  category: string; // 🔧 Firestore 데이터에 맞게 고정 타입 제거
+  nickname: string;
+  uid: string;
+}
 
 interface MyPostListProps {
   posts: Post[];
