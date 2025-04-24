@@ -8,6 +8,7 @@ export interface UserInfo {
   profileImage?: string;
   bio?: string;
   position?: string;
+
   snsLinks?: {
     github?: string;
     notion?: string;
@@ -15,9 +16,20 @@ export interface UserInfo {
     instagram?: string;
     x?: string;
   };
+
+  snsLinksVisible?: {
+    github?: boolean;
+    notion?: boolean;
+    blog?: boolean;
+    instagram?: boolean;
+    x?: boolean;
+    [key: string]: boolean | undefined; // ✅ 인덱스 시그니처 추가로 동적 접근 허용
+  };
+
   categoryLabels?: {
     [key: string]: string;
   };
+
   intro?: {
     interest: string;
     book: string;
