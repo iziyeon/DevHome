@@ -1,13 +1,27 @@
-// src/components/pages/mypage/SettingsProfile/EditIntroBanner.tsx
 import { useState } from "react";
+import { useUserStore } from "../../../../stores/useUserStore";
 
 export default function EditIntroBanner() {
-  const [interest, setInterest] = useState("웹 애니메이션");
-  const [book, setBook] = useState("개발자 글쓰기");
-  const [goal, setGoal] = useState("한 줄 커밋이라도 하기");
+  const user = useUserStore((state) => state.user);
+  const setUser = useUserStore((state) => state.setUser);
+
+  const [interest, setInterest] = useState(user?.intro?.interest ?? "");
+  const [book, setBook] = useState(user?.intro?.book ?? "");
+  const [goal, setGoal] = useState(user?.intro?.goal ?? "");
 
   const handleSave = () => {
-    // 나중에 Firestore 연동
+    if (!user?.uid) {
+      alert("로그인 정보가 없습니다.");
+      return;
+    }
+    setUser({
+      ...user,
+      intro: {
+        interest,
+        book,
+        goal,
+      },
+    });
     alert("Intro 정보가 저장되었습니다.");
   };
 

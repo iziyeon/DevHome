@@ -1,7 +1,8 @@
 import { useSearchParams, useParams, Link } from "react-router-dom";
-import { useState } from "react";
-import { myPageDummyPosts } from "../../../../data/MyPageDummyPosts";
+import { useState, useMemo } from "react";
 import { Search } from "lucide-react";
+import { useUserStore } from "../../../../stores/useUserStore";
+import { useMyPagePosts } from "../../../../hooks/useMyPagePosts";
 
 const postsPerPage = 6;
 
@@ -11,19 +12,25 @@ export default function MyPageSearchResult() {
   const keyword = params.get("keyword")?.toLowerCase() ?? "";
   const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredPosts = myPageDummyPosts
-    .filter(
+  const user = useUserStore((state) => state.user);
+  const { posts, loading } = useMyPagePosts(user?.uid || "");
+
+  const filteredPosts = useMemo(() => {
+    if (!keyword) return posts;
+    return posts.filter(
       (post) =>
         post.title.toLowerCase().includes(keyword) ||
         post.content.toLowerCase().includes(keyword)
-    )
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    );
+  }, [posts, keyword]);
 
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-  const currentPosts = filteredPosts.slice(
-    (currentPage - 1) * postsPerPage,
-    currentPage * postsPerPage
-  );
+  const currentPosts = filteredPosts
+    .slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage)
+    .map((post) => ({
+      ...post,
+      date: post.createdAt?.toDate().toLocaleDateString("ko-KR") || "",
+    }));
 
   const handlePrev = () => {
     if (currentPage > 1) setCurrentPage((p) => p - 1);
@@ -32,6 +39,14 @@ export default function MyPageSearchResult() {
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((p) => p + 1);
   };
+
+  if (!user?.uid) {
+    return (
+      <p className="text-sm text-gray-400 py-10 text-center">
+        유저 정보를 불러오는 중입니다...
+      </p>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -45,7 +60,7 @@ export default function MyPageSearchResult() {
         </span>
       </h2>
 
-      {currentPosts.length > 0 ? (
+      {!loading && currentPosts.length > 0 ? (
         <ul className="space-y-3 text-sm text-gray-300">
           {currentPosts.map((post) => (
             <li key={post.id}>
@@ -62,9 +77,11 @@ export default function MyPageSearchResult() {
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-gray-400">
-          검색 결과가 없습니다. 다른 키워드로 검색해보세요.
-        </p>
+        !loading && (
+          <p className="text-sm text-gray-400">
+            검색 결과가 없습니다. 다른 키워드로 검색해보세요.
+          </p>
+        )
       )}
 
       {totalPages > 1 && (

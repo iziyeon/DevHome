@@ -1,23 +1,69 @@
 import { useLocation, Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import { communityDummyPosts } from "../../../data/CommunityDummyPosts";
+import {
+  collection,
+  getDocs,
+  orderBy,
+  query,
+  Timestamp,
+} from "firebase/firestore";
+import { db } from "../../../firebase";
 
 const postsPerPage = 6;
+
+interface CommunityPost {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  createdAt?: Timestamp;
+}
 
 export default function CommunitySearchResult() {
   const location = useLocation();
   const keyword =
     new URLSearchParams(location.search).get("keyword")?.toLowerCase() || "";
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredPosts = communityDummyPosts
-    .filter(
+  const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const ref = collection(db, "posts");
+        const q = query(ref, orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+        const docs = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            title: data.title,
+            content: data.content,
+            date: data.createdAt?.toDate().toLocaleDateString("ko-KR") || "",
+            createdAt: data.createdAt,
+          } as CommunityPost;
+        });
+        setPosts(docs);
+      } catch (error) {
+        console.error("❌ 게시글 불러오기 오류:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  const filteredPosts = useMemo(() => {
+    if (!keyword) return posts;
+    return posts.filter(
       (post) =>
         post.title.toLowerCase().includes(keyword) ||
         post.content.toLowerCase().includes(keyword)
-    )
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    );
+  }, [posts, keyword]);
 
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
   const currentPosts = filteredPosts.slice(
@@ -43,7 +89,7 @@ export default function CommunitySearchResult() {
         </span>
       </h2>
 
-      {currentPosts.length > 0 ? (
+      {!loading && currentPosts.length > 0 ? (
         <>
           <ul className="space-y-2 text-sm text-gray-300">
             {currentPosts.map((post) => (
@@ -84,7 +130,11 @@ export default function CommunitySearchResult() {
           )}
         </>
       ) : (
-        <p className="text-center text-gray-400 py-20">검색 결과가 없습니다.</p>
+        !loading && (
+          <p className="text-center text-gray-400 py-20">
+            검색 결과가 없습니다.
+          </p>
+        )
       )}
     </div>
   );
