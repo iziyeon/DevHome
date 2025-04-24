@@ -16,10 +16,7 @@ export interface UserInfo {
     x?: string;
   };
   categoryLabels?: {
-    tech: string;
-    troubleshooting: string;
-    daily: string;
-    project: string;
+    [key: string]: string;
   };
   intro?: {
     interest: string;

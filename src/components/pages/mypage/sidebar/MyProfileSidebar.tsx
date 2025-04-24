@@ -22,12 +22,12 @@ interface MyProfileSidebarProps {
   username: string;
 }
 
-const CATEGORIES = [
-  { key: "tech", label: "기술 노트", icon: <FileText size={16} /> },
-  { key: "troubleshooting", label: "트러블슈팅", icon: <PenLine size={16} /> },
-  { key: "daily", label: "Daily", icon: <Mail size={16} /> },
-  { key: "project", label: "프로젝트", icon: <BookText size={16} /> },
-];
+const CATEGORY_ICONS: { [key: string]: JSX.Element } = {
+  tech: <FileText size={16} />,
+  troubleshooting: <PenLine size={16} />,
+  daily: <Mail size={16} />,
+  project: <BookText size={16} />,
+};
 
 const iconMap: { [key: string]: JSX.Element } = {
   github: <Github size={18} />,
@@ -53,28 +53,26 @@ export default function MyProfileSidebar({ username }: MyProfileSidebarProps) {
           <h2 className="text-lg font-bold">{user?.nickname || username}</h2>
           <p className="text-sm text-gray-300">{user?.bio}</p>
         </div>
-
         <SearchInput navigateTo={`/mypage/${username}/search`} />
-
         <div className="space-y-3">
           <h3 className="text-sm font-semibold flex items-center gap-2 text-indigo-300">
             <Folder size={16} />글 카테고리
           </h3>
           <ul className="space-y-2 text-sm">
-            {CATEGORIES.map(({ key, label, icon }) => (
-              <li key={key}>
-                <Link
-                  to={`/mypage/${username}/category/${key}`}
-                  className="flex items-center gap-2 hover:text-indigo-300 transition"
-                >
-                  {icon}
-                  {label}
-                </Link>
-              </li>
-            ))}
+            {user?.categoryLabels &&
+              Object.entries(user.categoryLabels).map(([key, label]) => (
+                <li key={key}>
+                  <Link
+                    to={`/mypage/${username}/category/${key}`}
+                    className="flex items-center gap-2 hover:text-indigo-300 transition"
+                  >
+                    {CATEGORY_ICONS[key] || <FileText size={16} />}
+                    {label}
+                  </Link>
+                </li>
+              ))}
           </ul>
         </div>
-
         <div className="space-y-3">
           <h3 className="text-sm font-semibold flex items-center gap-2 text-indigo-300">
             <Paperclip size={16} />
@@ -101,7 +99,6 @@ export default function MyProfileSidebar({ username }: MyProfileSidebarProps) {
             </li>
           </ul>
         </div>
-
         <div className="flex justify-center gap-4 pt-2">
           {user?.snsLinks &&
             Object.entries(user.snsLinks).map(([key, url]) =>
@@ -119,7 +116,6 @@ export default function MyProfileSidebar({ username }: MyProfileSidebarProps) {
               ) : null
             )}
         </div>
-
         <div className="pt-2 text-center">
           <Link
             to="/settings/profile"

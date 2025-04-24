@@ -6,20 +6,17 @@ import { PenLine } from "lucide-react";
 
 const postsPerPage = 6;
 
-const categoryMap: Record<string, string> = {
-  tech: "기술 노트",
-  troubleshooting: "트러블슈팅",
-  daily: "Daily",
-  project: "프로젝트",
-};
-
 export default function PostCategoryPage() {
   const { categoryKey, username } = useParams<{
     categoryKey: string;
     username: string;
   }>();
-  const categoryName = categoryMap[categoryKey || ""];
+
   const user = useUserStore((state) => state.user);
+
+  const categoryName =
+    (user?.categoryLabels as { [key: string]: string })?.[categoryKey || ""] ||
+    categoryKey;
 
   const [currentPage, setCurrentPage] = useState(1);
   const { posts, loading } = useMyPagePosts(user?.uid || "", categoryKey);
