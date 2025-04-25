@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useUserStore } from "../../../../stores/useUserStore";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, Timestamp } from "firebase/firestore";
 import { db } from "../../../../firebase";
 import { Trash2, Plus } from "lucide-react";
 
@@ -42,20 +42,17 @@ export default function EditCategoryLabels() {
 
   const handleSave = async () => {
     if (!user?.uid) return;
-
     const newCategoryLabels: { [key: string]: string } = {};
     for (const item of categories) {
       if (item.key && item.label) {
         newCategoryLabels[item.key] = item.label;
       }
     }
-
     const updatedUser = {
       ...user,
       categoryLabels: newCategoryLabels,
-      updatedAt: new Date(),
+      updatedAt: Timestamp.fromDate(new Date()),
     };
-
     await setDoc(doc(db, "users", user.uid), updatedUser);
     setUser(updatedUser);
     alert("카테고리 목록이 저장되었습니다.");
@@ -64,7 +61,6 @@ export default function EditCategoryLabels() {
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold text-white">카테고리 관리</h3>
-
       <div className="space-y-4">
         {categories.map((item, index) => (
           <div key={index} className="flex gap-2 items-center">
@@ -92,7 +88,6 @@ export default function EditCategoryLabels() {
           </div>
         ))}
       </div>
-
       <div>
         <button
           onClick={handleAdd}
@@ -101,7 +96,6 @@ export default function EditCategoryLabels() {
           <Plus size={14} />새 카테고리 추가
         </button>
       </div>
-
       <div className="text-right pt-2">
         <button
           onClick={handleSave}

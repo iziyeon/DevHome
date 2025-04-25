@@ -19,7 +19,7 @@ export default function CommunityPostGrid() {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    setCurrentPage(1); // 새로운 카테고리 클릭 시 페이지도 초기화
+    setCurrentPage(1);
   }, [location.key]);
 
   const handlePrev = () => {

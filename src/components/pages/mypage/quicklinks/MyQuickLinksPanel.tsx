@@ -10,7 +10,7 @@ export default function MyQuickLinksPanel() {
     .filter(([key, url]) => {
       const isVisible = snsLinksVisible[key];
       const hasUrl = url?.trim();
-      return hasUrl && isVisible !== false; // ❗️undefined는 true로 간주
+      return hasUrl && isVisible !== false;
     })
     .map(([key, url]) => ({
       id: key,
