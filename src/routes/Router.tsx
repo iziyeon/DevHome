@@ -23,6 +23,7 @@ import MyPageQuickLinks from "../components/pages/mypage/quicklinks/MyPageQuickL
 import MyPageSearchResult from "../components/pages/mypage/post/MyPageSearchResult";
 
 import SettingsProfile from "../components/pages/mypage/SettingsProfile/SettingsProfile";
+import NotFound from "../pages/NotFound";
 
 export default function Router() {
   return (
@@ -54,6 +55,7 @@ export default function Router() {
             <Route path="links" element={<MyPageQuickLinks />} />
           </Route>
           <Route path="/settings/profile" element={<SettingsProfile />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>
