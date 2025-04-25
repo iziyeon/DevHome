@@ -168,6 +168,3 @@ refactor: sidebar 구조 컴포넌트 분리
 
 MIT License © 2025 YEON
 
-```
-
-```
