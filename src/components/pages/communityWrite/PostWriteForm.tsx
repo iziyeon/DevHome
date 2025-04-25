@@ -25,6 +25,7 @@ export default function PostWriteForm() {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [content, setContent] = useState("");
+  const [loading, setLoading] = useState(isEditMode); // 초기 로딩 상태
 
   const user = useUserStore((state) => state.user);
 
@@ -42,6 +43,8 @@ export default function PostWriteForm() {
         }
       } catch (err) {
         console.error("❌ 기존 글 불러오기 실패:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -73,6 +76,10 @@ export default function PostWriteForm() {
       alert("글 저장 중 오류가 발생했습니다.");
     }
   };
+
+  if (loading) {
+    return <div className="text-center text-white py-20">로딩 중...</div>;
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

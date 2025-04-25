@@ -22,11 +22,16 @@ export default function MyPageHome() {
   const searchParam = new URLSearchParams(location.search).get("search");
   const { posts, loading } = useMyPagePosts(user?.uid || "");
 
+  const validCategories = user?.categoryLabels
+    ? Object.keys(user.categoryLabels)
+    : [];
+
   const filteredPosts = useMemo(() => {
     if (!user?.uid) return [];
     const keyword = searchParam?.toLowerCase() || "";
     return posts
       .filter((post) => {
+        if (!validCategories.includes(post.category)) return false;
         if (!keyword) return true;
         return (
           post.title.toLowerCase().includes(keyword) ||
@@ -38,7 +43,7 @@ export default function MyPageHome() {
         ...post,
         date: post.createdAt?.toDate().toLocaleDateString("ko-KR") || "",
       }));
-  }, [posts, searchParam, user?.uid]);
+  }, [posts, searchParam, user?.uid, user?.categoryLabels]);
 
   if (!user?.uid) {
     return (
@@ -70,7 +75,10 @@ export default function MyPageHome() {
       )}
 
       {!loading && filteredPosts.length > 0 && (
-        <MyPostList posts={filteredPosts} />
+        <MyPostList
+          posts={filteredPosts}
+          categoryLabels={user.categoryLabels}
+        />
       )}
 
       {!loading && filteredPosts.length === 0 && (
