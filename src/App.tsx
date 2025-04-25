@@ -1,5 +1,3 @@
-// src/App.tsx
-
 import AuthObserver from "./contexts/AuthObserver";
 import Router from "./routes/Router";
 import { useUserStore } from "./stores/useUserStore";

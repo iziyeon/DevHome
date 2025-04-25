@@ -18,7 +18,6 @@ export interface CommunityPost {
   uid: string;
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
-  readTime?: string;
   date?: string;
 }
 
@@ -31,6 +30,7 @@ export function useCommunityPosts(category?: string) {
       try {
         const ref = collection(db, "communityPosts");
         const trimmed = category?.trim();
+
         const q = trimmed
           ? query(
               ref,
@@ -40,17 +40,20 @@ export function useCommunityPosts(category?: string) {
           : query(ref, orderBy("createdAt", "desc"));
 
         const snapshot = await getDocs(q);
-        const result: CommunityPost[] = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as CommunityPost[];
-
-        console.log("🔥 현재 category 파라미터:", category);
-        console.log("🔥 Firestore에서 받아온 글 수:", result.length);
-        console.log(
-          "🔥 글들의 카테고리:",
-          result.map((r) => r.category)
-        );
+        const result: CommunityPost[] = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            title: data.title,
+            category: data.category,
+            content: data.content,
+            nickname: data.nickname,
+            uid: data.uid,
+            createdAt: data.createdAt,
+            updatedAt: data.updatedAt,
+            date: data.createdAt?.toDate().toLocaleDateString("ko-KR") || "",
+          };
+        });
 
         setPosts(result);
       } catch (error) {
@@ -60,6 +63,7 @@ export function useCommunityPosts(category?: string) {
         setLoading(false);
       }
     };
+
     fetch();
   }, [category]);
 
