@@ -1,9 +1,20 @@
-// src/components/pages/community/CommunityPostDetail.tsx
 import { useNavigate, useParams } from "react-router-dom";
-import { PenLine, Trash2 } from "lucide-react";
+import { PenLine, Trash2, Pencil, X } from "lucide-react";
 import { useState, useEffect } from "react";
-import { doc, getDoc, deleteDoc, Timestamp } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  deleteDoc,
+  Timestamp,
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../../../firebase";
+import { useUserStore } from "../../../stores/useUserStore";
 
 interface FirestorePost {
   title: string;
@@ -15,20 +26,35 @@ interface FirestorePost {
   createdAt?: Timestamp;
 }
 
+interface Comment {
+  id: string;
+  uid: string;
+  nickname: string;
+  content: string;
+  createdAt: Timestamp;
+}
+
 export default function CommunityPostDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const user = useUserStore((state) => state.user);
+
   const [post, setPost] = useState<FirestorePost | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
+
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentInput, setCommentInput] = useState("");
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
 
   useEffect(() => {
     if (!id) return;
     const fetchPost = async () => {
       try {
-        const docRef = doc(db, "communityPosts", id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setPost(docSnap.data() as FirestorePost);
+        const ref = doc(db, "communityPosts", id);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          setPost(snap.data() as FirestorePost);
         } else {
           setPost(null);
         }
@@ -41,17 +67,58 @@ export default function CommunityPostDetail() {
     fetchPost();
   }, [id]);
 
-  const handleDelete = async () => {
+  useEffect(() => {
+    if (!id) return;
+    const ref = collection(db, "communityPosts", id, "comments");
+    const q = query(ref, orderBy("createdAt", "asc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Omit<Comment, "id">),
+      }));
+      setComments(data);
+    });
+    return () => unsubscribe();
+  }, [id]);
+
+  const handleDeletePost = async () => {
     if (!id) return;
     const ok = confirm("정말로 삭제하시겠습니까?");
     if (!ok) return;
-    try {
-      await deleteDoc(doc(db, "communityPosts", id));
-      navigate("/community");
-    } catch (error) {
-      console.error("❌ 삭제 실패:", error);
-      alert("삭제 중 오류가 발생했습니다.");
-    }
+    await deleteDoc(doc(db, "communityPosts", id));
+    navigate("/community");
+  };
+
+  const handleCommentSubmit = async () => {
+    if (!user?.uid || !user?.nickname || !commentInput.trim() || !id) return;
+    await addDoc(collection(db, "communityPosts", id, "comments"), {
+      uid: user.uid,
+      nickname: user.nickname,
+      content: commentInput.trim(),
+      createdAt: Timestamp.now(),
+    });
+    setCommentInput("");
+  };
+
+  const handleCommentEdit = (comment: Comment) => {
+    setEditId(comment.id);
+    setEditContent(comment.content);
+  };
+
+  const handleCommentSave = async (commentId: string) => {
+    if (!id || !editContent.trim()) return;
+    await updateDoc(doc(db, "communityPosts", id, "comments", commentId), {
+      content: editContent.trim(),
+    });
+    setEditId(null);
+    setEditContent("");
+  };
+
+  const handleCommentDelete = async (commentId: string) => {
+    if (!id) return;
+    const ok = confirm("댓글을 삭제하시겠습니까?");
+    if (!ok) return;
+    await deleteDoc(doc(db, "communityPosts", id, "comments", commentId));
   };
 
   if (loading) {
@@ -74,7 +141,7 @@ export default function CommunityPostDetail() {
       <h1 className="text-3xl font-bold mb-3">{post.title}</h1>
       <div className="text-sm text-gray-400 mb-8">
         {post.nickname} ·{" "}
-        {post.updatedAt?.toDate().toLocaleString() ?? "시간 정보 없음"}
+        {post.updatedAt?.toDate().toLocaleString("ko-KR") ?? "시간 정보 없음"}
       </div>
       <div className="prose prose-invert whitespace-pre-wrap">
         {post.content || "내용이 없습니다."}
@@ -88,12 +155,111 @@ export default function CommunityPostDetail() {
           수정
         </button>
         <button
-          onClick={handleDelete}
+          onClick={handleDeletePost}
           className="btn btn-outline btn-sm border-white/20 text-white hover:border-red-400 hover:text-red-400 transition inline-flex items-center gap-1"
         >
           <Trash2 size={16} />
           삭제
         </button>
+      </div>
+
+      <div className="mt-12 space-y-6">
+        <h2 className="text-lg font-semibold text-white border-b border-white/10 pb-2">
+          댓글 {comments.length > 0 ? `(${comments.length})` : ""}
+        </h2>
+
+        {comments.length === 0 && (
+          <p className="text-gray-400 text-sm">아직 댓글이 없습니다.</p>
+        )}
+
+        {comments.map((comment) => {
+          const isMine = user?.uid === comment.uid;
+          const isEditing = editId === comment.id;
+          return (
+            <div
+              key={comment.id}
+              className="border border-white/10 bg-white/5 p-4 rounded-lg text-sm text-white space-y-2"
+            >
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-semibold text-indigo-300">
+                  {comment.nickname}
+                </span>
+                <span className="text-gray-400 text-xs">
+                  {comment.createdAt.toDate().toLocaleString("ko-KR")}
+                </span>
+              </div>
+
+              {isEditing ? (
+                <>
+                  <textarea
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    rows={3}
+                    className="textarea textarea-bordered w-full bg-[#1f2937] text-white"
+                  />
+                  <div className="flex justify-end gap-2 mt-2">
+                    <button
+                      onClick={() => {
+                        setEditId(null);
+                        setEditContent("");
+                      }}
+                      className="btn btn-xs border-white/20 hover:border-gray-400 hover:text-gray-400"
+                    >
+                      <X size={14} />
+                      취소
+                    </button>
+                    <button
+                      onClick={() => handleCommentSave(comment.id)}
+                      className="btn btn-xs border-white/20 hover:border-indigo-300 hover:text-indigo-300"
+                    >
+                      저장
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p>{comment.content}</p>
+                  {isMine && (
+                    <div className="flex justify-end gap-2 mt-2">
+                      <button
+                        onClick={() => handleCommentEdit(comment)}
+                        className="btn btn-outline btn-xs border-white/20 text-white hover:text-indigo-300 hover:border-indigo-300"
+                      >
+                        <Pencil size={14} />
+                        수정
+                      </button>
+                      <button
+                        onClick={() => handleCommentDelete(comment.id)}
+                        className="btn btn-outline btn-xs border-white/20 text-white hover:text-red-400 hover:border-red-400"
+                      >
+                        <Trash2 size={14} />
+                        삭제
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
+
+        <div className="space-y-2 mt-6">
+          <textarea
+            value={commentInput}
+            onChange={(e) => setCommentInput(e.target.value)}
+            placeholder="댓글을 입력하세요"
+            rows={3}
+            className="textarea textarea-bordered w-full bg-[#1f2937] text-white placeholder-white/40"
+          />
+          <div className="text-right">
+            <button
+              onClick={handleCommentSubmit}
+              className="btn btn-sm btn-outline border-white/20 text-white hover:border-indigo-300 hover:text-indigo-300"
+            >
+              댓글 작성
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
