@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { ExternalLink, Trash2, Pencil } from "lucide-react";
 import { useUserStore } from "../../../../stores/useUserStore";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, Timestamp } from "firebase/firestore";
 import { db } from "../../../../firebase";
 
 interface QuickLink {
@@ -34,7 +34,7 @@ export default function MyPageQuickLinks() {
     const initialLinks = Object.entries(user?.snsLinks || {})
       .filter(([, url]) => url?.trim())
       .map(([label, url]) => {
-        const id = label + Date.now(); // unique id
+        const id = label + Date.now();
         setVisibleMap((prev) => ({
           ...prev,
           [label]: initialVisible[label] ?? true,
@@ -109,7 +109,7 @@ export default function MyPageQuickLinks() {
       ...user,
       snsLinks: newSnsLinks,
       snsLinksVisible: newVisible,
-      updatedAt: new Date(),
+      updatedAt: Timestamp.fromDate(new Date()),
     };
 
     await setDoc(userRef, newUserData);

@@ -24,6 +24,7 @@ export interface UserInfo {
     instagram?: string;
     x?: string;
   };
+  snsLinksVisible?: { [key: string]: boolean };
   experience?: {
     company: string;
     position: string;

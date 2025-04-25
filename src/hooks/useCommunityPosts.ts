@@ -19,6 +19,7 @@ export interface CommunityPost {
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
   date?: string;
+  readTime?: string;
 }
 
 export function useCommunityPosts(category?: string) {
@@ -52,6 +53,7 @@ export function useCommunityPosts(category?: string) {
             createdAt: data.createdAt,
             updatedAt: data.updatedAt,
             date: data.createdAt?.toDate().toLocaleDateString("ko-KR") || "",
+            readTime: data.readTime,
           };
         });
 
