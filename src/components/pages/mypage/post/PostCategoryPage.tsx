@@ -1,36 +1,36 @@
 import { Link, useParams } from "react-router-dom";
-import { useState } from "react";
-import { myPageDummyPosts, Post } from "../../../../data/MyPageDummyPosts";
+import { useState, useEffect } from "react";
+import { useUserStore } from "../../../../stores/useUserStore";
+import { useMyPagePosts } from "../../../../hooks/useMyPagePosts";
 import { PenLine } from "lucide-react";
 
 const postsPerPage = 6;
-
-const categoryMap: Record<string, string> = {
-  tech: "기술 노트",
-  troubleshooting: "트러블슈팅",
-  daily: "Daily",
-  project: "프로젝트",
-};
 
 export default function PostCategoryPage() {
   const { categoryKey, username } = useParams<{
     categoryKey: string;
     username: string;
   }>();
+
+  const user = useUserStore((state) => state.user);
+
+  const categoryName =
+    (user?.categoryLabels as { [key: string]: string })?.[categoryKey || ""] ||
+    categoryKey;
+
   const [currentPage, setCurrentPage] = useState(1);
+  const { posts, loading } = useMyPagePosts(user?.uid || "", categoryKey);
 
-  const categoryName = categoryMap[categoryKey || ""];
-  const filteredPosts = categoryKey
-    ? myPageDummyPosts
-        .filter((post) => post.category === categoryKey)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    : [];
-
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-  const currentPosts = filteredPosts.slice(
+  const totalPages = Math.ceil(posts.length / postsPerPage);
+  const currentPosts = posts.slice(
     (currentPage - 1) * postsPerPage,
     currentPage * postsPerPage
   );
+
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+    setCurrentPage(1);
+  }, [categoryKey]);
 
   const handlePrev = () => {
     if (currentPage > 1) setCurrentPage((p) => p - 1);
@@ -63,12 +63,14 @@ export default function PostCategoryPage() {
         </Link>
       </header>
 
-      {filteredPosts.length === 0 ? (
+      {loading ? (
+        <p className="text-gray-400">로딩 중...</p>
+      ) : currentPosts.length === 0 ? (
         <p className="text-gray-400">해당 카테고리에 글이 없습니다.</p>
       ) : (
         <>
           <ul className="grid sm:grid-cols-2 gap-4">
-            {currentPosts.map((post: Post) => (
+            {currentPosts.map((post) => (
               <li
                 key={post.id}
                 className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm hover:border-indigo-300 transition"
@@ -78,7 +80,9 @@ export default function PostCategoryPage() {
                   className="hover:text-indigo-300 transition"
                 >
                   <p className="font-medium truncate">{post.title}</p>
-                  <p className="text-xs text-gray-400 mt-1">{post.date}</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {post.createdAt?.toDate().toLocaleDateString("ko-KR") || ""}
+                  </p>
                 </Link>
               </li>
             ))}

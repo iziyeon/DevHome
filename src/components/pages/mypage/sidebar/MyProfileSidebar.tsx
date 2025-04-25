@@ -11,79 +11,68 @@ import {
   Twitter,
   Instagram,
   Notebook,
+  Globe,
 } from "lucide-react";
 import SearchInput from "../../../common/SearchInput";
 import defaultProfile from "../../../../assets/layout/default.jpg";
+import { useUserStore } from "../../../../stores/useUserStore";
+import { JSX } from "react";
 
 interface MyProfileSidebarProps {
   username: string;
 }
 
-const CATEGORIES = [
-  { key: "tech", label: "기술 노트", icon: <FileText size={16} /> },
-  { key: "troubleshooting", label: "트러블슈팅", icon: <PenLine size={16} /> },
-  { key: "daily", label: "Daily", icon: <Mail size={16} /> },
-  { key: "project", label: "프로젝트", icon: <BookText size={16} /> },
-];
+const CATEGORY_ICONS: { [key: string]: JSX.Element } = {
+  tech: <FileText size={16} />,
+  troubleshooting: <PenLine size={16} />,
+  daily: <Mail size={16} />,
+  project: <BookText size={16} />,
+};
 
-const SNS_LINKS = [
-  {
-    label: "GitHub",
-    icon: <Github size={18} />,
-    url: "https://github.com/yeon",
-  },
-  {
-    label: "Notion",
-    icon: <Notebook size={18} />,
-    url: "https://notion.so/yeon",
-  },
-  {
-    label: "Twitter",
-    icon: <Twitter size={18} />,
-    url: "https://twitter.com/yourhandle",
-  },
-  {
-    label: "Instagram",
-    icon: <Instagram size={18} />,
-    url: "https://instagram.com/yourid",
-  },
-];
+const iconMap: { [key: string]: JSX.Element } = {
+  github: <Github size={18} />,
+  notion: <Notebook size={18} />,
+  twitter: <Twitter size={18} />,
+  x: <Twitter size={18} />,
+  instagram: <Instagram size={18} />,
+  blog: <Globe size={18} />,
+};
 
 export default function MyProfileSidebar({ username }: MyProfileSidebarProps) {
+  const user = useUserStore((state) => state.user);
+
   return (
     <aside className="w-full md:w-[240px] text-white">
       <div className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-6">
         <div className="text-center space-y-2">
           <img
-            src={defaultProfile}
+            src={user?.profileImage || defaultProfile}
             alt="프로필 이미지"
             className="w-24 h-24 rounded-full mx-auto object-cover"
           />
-          <h2 className="text-lg font-bold">{username}</h2>
-          <p className="text-sm text-gray-300">기록하고 공유하며 성장합니다.</p>
+          <h2 className="text-lg font-bold">{user?.nickname || username}</h2>
+          <p className="text-sm text-gray-300">{user?.bio}</p>
         </div>
-
         <SearchInput navigateTo={`/mypage/${username}/search`} />
-
         <div className="space-y-3">
           <h3 className="text-sm font-semibold flex items-center gap-2 text-indigo-300">
             <Folder size={16} />글 카테고리
           </h3>
           <ul className="space-y-2 text-sm">
-            {CATEGORIES.map(({ key, label, icon }) => (
-              <li key={key}>
-                <Link
-                  to={`/mypage/${username}/category/${key}`}
-                  className="flex items-center gap-2 hover:text-indigo-300 transition"
-                >
-                  {icon}
-                  {label}
-                </Link>
-              </li>
-            ))}
+            {user?.categoryLabels &&
+              Object.entries(user.categoryLabels).map(([key, label]) => (
+                <li key={key}>
+                  <Link
+                    to={`/mypage/${username}/category/${key}`}
+                    className="flex items-center gap-2 hover:text-indigo-300 transition"
+                  >
+                    {CATEGORY_ICONS[key] || <FileText size={16} />}
+                    {label}
+                  </Link>
+                </li>
+              ))}
           </ul>
         </div>
-
         <div className="space-y-3">
           <h3 className="text-sm font-semibold flex items-center gap-2 text-indigo-300">
             <Paperclip size={16} />
@@ -110,22 +99,23 @@ export default function MyProfileSidebar({ username }: MyProfileSidebarProps) {
             </li>
           </ul>
         </div>
-
         <div className="flex justify-center gap-4 pt-2">
-          {SNS_LINKS.map((link) => (
-            <a
-              key={link.label}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-400 hover:text-indigo-300 transition"
-              aria-label={link.label}
-            >
-              {link.icon}
-            </a>
-          ))}
+          {user?.snsLinks &&
+            Object.entries(user.snsLinks).map(([key, url]) =>
+              url && iconMap[key] ? (
+                <a
+                  key={key}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-indigo-300 transition"
+                  aria-label={key}
+                >
+                  {iconMap[key]}
+                </a>
+              ) : null
+            )}
         </div>
-
         <div className="pt-2 text-center">
           <Link
             to="/settings/profile"

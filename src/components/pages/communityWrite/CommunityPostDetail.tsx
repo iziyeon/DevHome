@@ -1,52 +1,129 @@
-// src/components/pages/community/CommunityPostDetail.tsx
 import { useNavigate, useParams } from "react-router-dom";
-import { PenLine, Trash2 } from "lucide-react";
+import { PenLine, Trash2, Pencil, X } from "lucide-react";
 import { useState, useEffect } from "react";
-import { communityDummyPosts } from "../../../data/CommunityDummyPosts";
 import {
-  commentDummy,
-  Comment as CommunityComment,
-} from "../../../data/commentDummy";
+  doc,
+  getDoc,
+  deleteDoc,
+  Timestamp,
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  updateDoc,
+} from "firebase/firestore";
+import { db } from "../../../firebase";
+import { useUserStore } from "../../../stores/useUserStore";
+
+interface FirestorePost {
+  title: string;
+  category: string;
+  content: string;
+  nickname: string;
+  uid: string;
+  updatedAt?: Timestamp;
+  createdAt?: Timestamp;
+}
+
+interface Comment {
+  id: string;
+  uid: string;
+  nickname: string;
+  content: string;
+  createdAt: Timestamp;
+}
 
 export default function CommunityPostDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const user = useUserStore((state) => state.user);
 
-  const currentUserNickname = "yeon";
-  const post = communityDummyPosts.find((p) => p.id === id);
-  const initialComments = id && commentDummy[id] ? commentDummy[id] : [];
+  const [post, setPost] = useState<FirestorePost | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const [localComments, setLocalComments] = useState<CommunityComment[]>([]);
-  const [commentText, setCommentText] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editText, setEditText] = useState("");
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentInput, setCommentInput] = useState("");
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
 
   useEffect(() => {
-    setLocalComments(initialComments);
+    if (!id) return;
+    const fetchPost = async () => {
+      try {
+        const ref = doc(db, "communityPosts", id);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          setPost(snap.data() as FirestorePost);
+        } else {
+          setPost(null);
+        }
+      } catch {
+        setPost(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPost();
   }, [id]);
 
-  const handleDeletePost = () => {
-    const confirmed = confirm("정말로 삭제하시겠습니까?");
-    if (confirmed && post) {
-      console.log(`🗑 글 삭제됨: ${post.id}`);
-      navigate("/community");
-    }
+  useEffect(() => {
+    if (!id) return;
+    const ref = collection(db, "communityPosts", id, "comments");
+    const q = query(ref, orderBy("createdAt", "asc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Omit<Comment, "id">),
+      }));
+      setComments(data);
+    });
+    return () => unsubscribe();
+  }, [id]);
+
+  const handleDeletePost = async () => {
+    if (!id) return;
+    const ok = confirm("정말로 삭제하시겠습니까?");
+    if (!ok) return;
+    await deleteDoc(doc(db, "communityPosts", id));
+    navigate("/community");
   };
 
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!commentText.trim()) return;
-
-    const newComment: CommunityComment = {
-      id: Math.random().toString(36).slice(2, 9),
-      author: currentUserNickname,
-      content: commentText,
-      date: new Date().toISOString().slice(0, 10),
-    };
-
-    setLocalComments((prev) => [...prev, newComment]);
-    setCommentText("");
+  const handleCommentSubmit = async () => {
+    if (!user?.uid || !user?.nickname || !commentInput.trim() || !id) return;
+    await addDoc(collection(db, "communityPosts", id, "comments"), {
+      uid: user.uid,
+      nickname: user.nickname,
+      content: commentInput.trim(),
+      createdAt: Timestamp.now(),
+    });
+    setCommentInput("");
   };
+
+  const handleCommentEdit = (comment: Comment) => {
+    setEditId(comment.id);
+    setEditContent(comment.content);
+  };
+
+  const handleCommentSave = async (commentId: string) => {
+    if (!id || !editContent.trim()) return;
+    await updateDoc(doc(db, "communityPosts", id, "comments", commentId), {
+      content: editContent.trim(),
+    });
+    setEditId(null);
+    setEditContent("");
+  };
+
+  const handleCommentDelete = async (commentId: string) => {
+    if (!id) return;
+    const ok = confirm("댓글을 삭제하시겠습니까?");
+    if (!ok) return;
+    await deleteDoc(doc(db, "communityPosts", id, "comments", commentId));
+  };
+
+  if (loading) {
+    return <div className="text-center text-white py-20">로딩 중...</div>;
+  }
 
   if (!post) {
     return (
@@ -61,20 +138,17 @@ export default function CommunityPostDetail() {
       <span className="badge badge-outline text-indigo-300 border-indigo-300 mb-4">
         #{post.category}
       </span>
-
       <h1 className="text-3xl font-bold mb-3">{post.title}</h1>
-
       <div className="text-sm text-gray-400 mb-8">
-        {post.author} · {post.date} · {post.readTime}
+        {post.nickname} ·{" "}
+        {post.updatedAt?.toDate().toLocaleString("ko-KR") ?? "시간 정보 없음"}
       </div>
-
       <div className="prose prose-invert whitespace-pre-wrap">
         {post.content || "내용이 없습니다."}
       </div>
-
       <div className="flex flex-wrap gap-2 justify-end mt-8">
         <button
-          onClick={() => navigate(`/community/write?id=${post.id}`)}
+          onClick={() => navigate(`/community/write?id=${id}`)}
           className="btn btn-outline btn-sm border-white/20 text-white hover:border-indigo-300 hover:text-indigo-300 transition inline-flex items-center gap-1"
         >
           <PenLine size={16} />
@@ -89,118 +163,103 @@ export default function CommunityPostDetail() {
         </button>
       </div>
 
-      <div className="mt-10">
-        <button
-          onClick={() => navigate(-1)}
-          className="btn btn-outline btn-sm border-white/20 text-white hover:border-indigo-300 hover:text-indigo-300 transition"
-        >
-          ← 뒤로가기
-        </button>
-      </div>
-
-      <div className="mt-16 space-y-6 animate-fade-in">
-        <h2 className="text-xl font-bold text-white">
-          💬 댓글 {localComments.length}개
+      <div className="mt-12 space-y-6">
+        <h2 className="text-lg font-semibold text-white border-b border-white/10 pb-2">
+          댓글 {comments.length > 0 ? `(${comments.length})` : ""}
         </h2>
 
-        <div className="space-y-4">
-          {localComments.map((comment, index) => (
+        {comments.length === 0 && (
+          <p className="text-gray-400 text-sm">아직 댓글이 없습니다.</p>
+        )}
+
+        {comments.map((comment) => {
+          const isMine = user?.uid === comment.uid;
+          const isEditing = editId === comment.id;
+          return (
             <div
               key={comment.id}
-              className="p-4 rounded-lg bg-[#1f2937] border border-gray-600 text-sm text-white opacity-100 animate-fade-in"
-              style={{
-                animationDelay: `${index * 0.1}s`,
-                animationFillMode: "forwards",
-              }}
+              className="border border-white/10 bg-white/5 p-4 rounded-lg text-sm text-white space-y-2"
             >
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                <div className="font-semibold text-indigo-300">
-                  {comment.author}
-                </div>
-
-                {comment.author === currentUserNickname && (
-                  <div className="flex gap-2">
-                    {editingId === comment.id ? (
-                      <button
-                        onClick={() => {
-                          setLocalComments((prev) =>
-                            prev.map((c) =>
-                              c.id === editingId
-                                ? { ...c, content: editText }
-                                : c
-                            )
-                          );
-                          setEditingId(null);
-                          setEditText("");
-                        }}
-                        className="btn btn-outline btn-xs border-white/20 text-white hover:border-indigo-300 hover:text-indigo-300 transition"
-                      >
-                        저장
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setEditingId(comment.id);
-                          setEditText(comment.content);
-                        }}
-                        className="btn btn-outline btn-xs border-white/20 text-white hover:border-indigo-300 hover:text-indigo-300 transition"
-                      >
-                        수정
-                      </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        if (confirm("정말로 삭제하시겠습니까?")) {
-                          setLocalComments((prev) =>
-                            prev.filter((c) => c.id !== comment.id)
-                          );
-                        }
-                      }}
-                      className="btn btn-outline btn-xs border-white/20 text-white hover:border-red-400 hover:text-red-400 transition"
-                    >
-                      삭제
-                    </button>
-                  </div>
-                )}
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-semibold text-indigo-300">
+                  {comment.nickname}
+                </span>
+                <span className="text-gray-400 text-xs">
+                  {comment.createdAt.toDate().toLocaleString("ko-KR")}
+                </span>
               </div>
 
-              {editingId === comment.id ? (
-                <textarea
-                  value={editText}
-                  onChange={(e) => setEditText(e.target.value)}
-                  className="mt-2 w-full bg-[#1f2937] text-white border border-white/10 rounded px-2 py-1 text-sm"
-                />
+              {isEditing ? (
+                <>
+                  <textarea
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    rows={3}
+                    className="textarea textarea-bordered w-full bg-[#1f2937] text-white"
+                  />
+                  <div className="flex justify-end gap-2 mt-2">
+                    <button
+                      onClick={() => {
+                        setEditId(null);
+                        setEditContent("");
+                      }}
+                      className="btn btn-xs border-white/20 hover:border-gray-400 hover:text-gray-400"
+                    >
+                      <X size={14} />
+                      취소
+                    </button>
+                    <button
+                      onClick={() => handleCommentSave(comment.id)}
+                      className="btn btn-xs border-white/20 hover:border-indigo-300 hover:text-indigo-300"
+                    >
+                      저장
+                    </button>
+                  </div>
+                </>
               ) : (
-                <div className="mt-2 whitespace-pre-wrap">
-                  {comment.content}
-                </div>
+                <>
+                  <p>{comment.content}</p>
+                  {isMine && (
+                    <div className="flex justify-end gap-2 mt-2">
+                      <button
+                        onClick={() => handleCommentEdit(comment)}
+                        className="btn btn-outline btn-xs border-white/20 text-white hover:text-indigo-300 hover:border-indigo-300"
+                      >
+                        <Pencil size={14} />
+                        수정
+                      </button>
+                      <button
+                        onClick={() => handleCommentDelete(comment.id)}
+                        className="btn btn-outline btn-xs border-white/20 text-white hover:text-red-400 hover:border-red-400"
+                      >
+                        <Trash2 size={14} />
+                        삭제
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
-              <div className="text-gray-400 text-xs mt-2">{comment.date}</div>
             </div>
-          ))}
-        </div>
+          );
+        })}
 
-        <form
-          onSubmit={handleCommentSubmit}
-          className="space-y-2 animate-fade-in delay-200"
-        >
+        <div className="space-y-2 mt-6">
           <textarea
-            value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
+            value={commentInput}
+            onChange={(e) => setCommentInput(e.target.value)}
             placeholder="댓글을 입력하세요"
+            rows={3}
             className="textarea textarea-bordered w-full bg-[#1f2937] text-white placeholder-white/40"
-            rows={4}
-            required
           />
-          <div className="flex justify-end">
+          <div className="text-right">
             <button
-              type="submit"
-              className="btn btn-outline btn-sm border-white/20 text-white hover:border-indigo-300 hover:text-indigo-300 transition"
+              onClick={handleCommentSubmit}
+              className="btn btn-sm btn-outline border-white/20 text-white hover:border-indigo-300 hover:text-indigo-300"
             >
-              댓글 등록
+              댓글 작성
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

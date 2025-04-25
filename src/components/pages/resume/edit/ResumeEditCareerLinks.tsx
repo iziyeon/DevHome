@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useUserStore } from "../../../../stores/useUserStore";
 import { LinkItem } from "../../../../types/resumeTypes";
 
 interface Props {
@@ -11,6 +13,17 @@ const emptyItem: LinkItem = {
 };
 
 export default function ResumeEditCareerLinks({ links, onChange }: Props) {
+  const user = useUserStore((state) => state.user);
+
+  useEffect(() => {
+    if (links.length === 0 && user?.snsLinks) {
+      const prefill = Object.entries(user.snsLinks)
+        .filter(([, url]) => url)
+        .map(([label, url]) => ({ label, url: url! }));
+      onChange(prefill.length > 0 ? prefill : [emptyItem]);
+    }
+  }, [links.length, user?.snsLinks]);
+
   const handleChange = (
     index: number,
     field: keyof LinkItem,

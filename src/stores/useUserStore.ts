@@ -1,26 +1,72 @@
-// src/stores/useUserStore.ts
-
 import { create } from "zustand";
+import { Timestamp } from "firebase/firestore";
 
-interface UserInfo {
+export interface UserInfo {
   uid: string;
+  email: string;
   name: string;
   nickname: string;
-  email: string;
+  profileImage?: string;
+  position?: string;
+  bio?: string;
+  intro?: {
+    interest?: string;
+    book?: string;
+    goal?: string;
+  };
+  categoryLabels?: {
+    [key: string]: string;
+  };
+  snsLinks?: {
+    github?: string;
+    notion?: string;
+    blog?: string;
+    instagram?: string;
+    x?: string;
+  };
+  snsLinksVisible?: { [key: string]: boolean };
+  experience?: {
+    company: string;
+    position: string;
+    period: string;
+    description: string;
+  }[];
+  education?: {
+    title: string;
+    org: string;
+    period: string;
+  }[];
+  links?: {
+    label: string;
+    url: string;
+  }[];
+  projects?: {
+    title: string;
+    description: string;
+    stack: string[];
+    role: string;
+    deployUrl?: string;
+    githubUrl?: string;
+  }[];
+  techStack?: {
+    [category: string]: string[];
+  };
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
 }
 
-interface UserState {
+interface UserStore {
   user: UserInfo | null;
   isLoading: boolean;
-  setUser: (user: UserInfo) => void;
+  setUser: (user: UserInfo | null) => void;
   clearUser: () => void;
-  setLoading: (loading: boolean) => void;
+  setIsLoading: (loading: boolean) => void;
 }
 
-export const useUserStore = create<UserState>((set) => ({
+export const useUserStore = create<UserStore>((set) => ({
   user: null,
-  isLoading: true,
-  setUser: (user) => set({ user, isLoading: false }),
-  clearUser: () => set({ user: null, isLoading: false }),
-  setLoading: (loading) => set({ isLoading: loading }),
+  isLoading: false,
+  setUser: (user) => set({ user }),
+  clearUser: () => set({ user: null }),
+  setIsLoading: (loading) => set({ isLoading: loading }),
 }));

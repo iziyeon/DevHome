@@ -1,29 +1,26 @@
 import { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
-import {
-  communityDummyPosts,
-  POSTS_PER_PAGE,
-} from "../../../data/CommunityDummyPosts";
+import { useCommunityPosts } from "../../../hooks/useCommunityPosts";
+
+const POSTS_PER_PAGE = 6;
 
 export default function CommunityPostGrid() {
   const location = useLocation();
-  const categoryParam = new URLSearchParams(location.search).get("category");
+  const categoryParam =
+    new URLSearchParams(location.search).get("category") || undefined;
   const [currentPage, setCurrentPage] = useState(1);
+  const { posts, loading } = useCommunityPosts(categoryParam);
 
-  const filteredPosts = categoryParam
-    ? communityDummyPosts.filter((post) => post.category === categoryParam)
-    : communityDummyPosts;
-
-  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
-
-  const paginatedPosts = filteredPosts.slice(
+  const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
+  const paginatedPosts = posts.slice(
     (currentPage - 1) * POSTS_PER_PAGE,
     currentPage * POSTS_PER_PAGE
   );
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentPage]);
+    setCurrentPage(1);
+  }, [location.key]);
 
   const handlePrev = () => {
     if (currentPage > 1) setCurrentPage((p) => p - 1);
@@ -41,7 +38,9 @@ export default function CommunityPostGrid() {
         </h2>
       )}
 
-      {paginatedPosts.length === 0 ? (
+      {loading ? (
+        <p className="text-gray-400">로딩 중...</p>
+      ) : paginatedPosts.length === 0 ? (
         <p className="text-gray-400">해당 카테고리에 작성된 글이 없습니다.</p>
       ) : (
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -56,7 +55,9 @@ export default function CommunityPostGrid() {
               >
                 <p className="font-medium truncate">{post.title}</p>
                 <p className="text-xs text-gray-400 mt-1">
-                  {post.date} · {post.readTime}
+                  {post.createdAt?.toDate().toLocaleDateString("ko-KR") ||
+                    "날짜 없음"}
+                  {post.readTime && ` · ${post.readTime}`}
                 </p>
               </Link>
             </li>

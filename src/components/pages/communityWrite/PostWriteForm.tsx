@@ -1,7 +1,10 @@
 // src/components/pages/write/PostWriteForm.tsx
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { communityDummyPosts } from "../../../data/CommunityDummyPosts";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../../firebase";
+import { useUserStore } from "../../../stores/useUserStore";
+import { savePostToFirestore } from "../../../services/firestore/posts";
 
 const categoryOptions = [
   "기능구현팁",
@@ -17,46 +20,69 @@ export default function PostWriteForm() {
   const [searchParams] = useSearchParams();
   const postId = searchParams.get("id");
   const isEditMode = Boolean(postId);
+  const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [content, setContent] = useState("");
+  const [loading, setLoading] = useState(isEditMode); // 초기 로딩 상태
 
-  // ✅ 수정 모드일 때 기존 글 데이터 불러오기
+  const user = useUserStore((state) => state.user);
+
   useEffect(() => {
-    if (!isEditMode) return;
-
-    const existingPost = communityDummyPosts.find((p) => p.id === postId);
-    if (existingPost) {
-      setTitle(existingPost.title);
-      setCategory(existingPost.category);
-      setContent(existingPost.content);
-    }
-  }, [isEditMode, postId]);
-
-  // ✅ 제출 처리
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const formData = {
-      id: postId,
-      title,
-      category,
-      content,
+    const fetchPost = async () => {
+      if (!isEditMode || !postId) return;
+      try {
+        const ref = doc(db, "communityPosts", postId);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          const data = snap.data();
+          setTitle(data.title || "");
+          setCategory(data.category || "");
+          setContent(data.content || "");
+        }
+      } catch (err) {
+        console.error("❌ 기존 글 불러오기 실패:", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (isEditMode) {
-      console.log("🛠 수정된 글:", formData);
-    } else {
-      console.log("📝 새 글 작성됨:", formData);
+    fetchPost();
+  }, [isEditMode, postId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!user?.uid || !user?.nickname) {
+      alert("로그인이 필요합니다.");
+      return;
     }
 
-    // TODO: Firestore 저장 또는 업데이트 로직
+    try {
+      const savedId = await savePostToFirestore({
+        id: postId || undefined,
+        title,
+        category,
+        content,
+        uid: user.uid,
+        nickname: user.nickname,
+        isMyPagePost: false,
+      });
+
+      navigate(`/community/post/${savedId}`);
+    } catch (error) {
+      console.error("❌ 게시글 저장 실패:", error);
+      alert("글 저장 중 오류가 발생했습니다.");
+    }
   };
+
+  if (loading) {
+    return <div className="text-center text-white py-20">로딩 중...</div>;
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* 제목 */}
       <div>
         <label className="block mb-2 text-sm text-gray-300">제목</label>
         <input
@@ -69,7 +95,6 @@ export default function PostWriteForm() {
         />
       </div>
 
-      {/* 카테고리 */}
       <div>
         <label className="block mb-2 text-sm text-gray-300">카테고리</label>
         <select
@@ -89,7 +114,6 @@ export default function PostWriteForm() {
         </select>
       </div>
 
-      {/* 내용 */}
       <div>
         <label className="block mb-2 text-sm text-gray-300">내용</label>
         <textarea
@@ -101,7 +125,6 @@ export default function PostWriteForm() {
         />
       </div>
 
-      {/* 제출 */}
       <div className="flex justify-end">
         <button type="submit" className="btn btn-primary">
           {isEditMode ? "수정 완료" : "작성 완료"}

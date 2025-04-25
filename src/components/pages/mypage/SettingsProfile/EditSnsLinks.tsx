@@ -1,56 +1,62 @@
-// src/components/pages/mypage/SettingsProfile/EditSnsLinks.tsx
 import { useState } from "react";
+import { doc, setDoc, Timestamp } from "firebase/firestore";
+import { db } from "../../../../firebase";
+import { useUserStore } from "../../../../stores/useUserStore";
+
+const snsFields = ["github", "notion", "blog", "instagram", "x"];
 
 export default function EditSnsLinks() {
-  const [links, setLinks] = useState({
-    github: "https://github.com/your-username",
-    twitter: "https://twitter.com/your-handle",
-    instagram: "https://instagram.com/your-id",
-    notion: "https://notion.so/your-page",
-  });
+  const user = useUserStore((state) => state.user);
+  const setUser = useUserStore((state) => state.setUser);
 
-  const handleChange = (key: keyof typeof links, value: string) => {
-    setLinks((prev) => ({ ...prev, [key]: value }));
+  const [snsLinks, setSnsLinks] = useState<{
+    [key: string]: string | undefined;
+  }>(user?.snsLinks || {});
+  const [saved, setSaved] = useState(false);
+
+  const handleChange = (key: string, value: string) => {
+    setSnsLinks((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSave = () => {
-    alert("SNS 링크가 저장되었습니다.");
+  const handleSave = async () => {
+    if (!user?.uid) return;
+    const userRef = doc(db, "users", user.uid);
+    const newData = {
+      ...user,
+      snsLinks,
+      updatedAt: Timestamp.fromDate(new Date()),
+    };
+    await setDoc(userRef, newData);
+    setUser(newData);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
-
-  const fields = [
-    { key: "github", label: "GitHub" },
-    { key: "twitter", label: "Twitter" },
-    { key: "instagram", label: "Instagram" },
-    { key: "notion", label: "Notion" },
-  ] as const;
 
   return (
-    <div className="space-y-6">
-      <h3 className="text-lg font-semibold text-white">SNS 링크 수정</h3>
-
-      <div className="space-y-4">
-        {fields.map(({ key, label }) => (
-          <div key={key}>
-            <label className="mb-1 block text-sm text-gray-300">{label}</label>
-            <input
-              type="url"
-              value={links[key]}
-              onChange={(e) => handleChange(key, e.target.value)}
-              placeholder={`https://${key}.com`}
-              className="input input-bordered w-full bg-white/10 text-white border-white/10 placeholder-gray-400"
-            />
-          </div>
-        ))}
-      </div>
-
-      <div className="text-right">
+    <div className="space-y-4">
+      {snsFields.map((field) => (
+        <div key={field}>
+          <label className="block text-sm mb-1 capitalize">{field}</label>
+          <input
+            type="url"
+            value={snsLinks[field] || ""}
+            onChange={(e) => handleChange(field, e.target.value)}
+            className="input input-bordered w-full bg-[#1f2937] text-white placeholder-white/40"
+            placeholder={`https://${field}.com/yourname`}
+          />
+        </div>
+      ))}
+      <div className="pt-2 flex justify-end">
         <button
           onClick={handleSave}
-          className="btn btn-outline btn-sm text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300 transition"
+          className="btn btn-outline btn-sm border-white/20 text-white hover:border-indigo-300 hover:text-indigo-300 transition"
         >
           저장
         </button>
       </div>
+      {saved && (
+        <p className="text-green-400 mt-2 text-right">저장되었습니다 ✅</p>
+      )}
     </div>
   );
 }

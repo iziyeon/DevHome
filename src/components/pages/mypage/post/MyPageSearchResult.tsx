@@ -1,7 +1,8 @@
 import { useSearchParams, useParams, Link } from "react-router-dom";
-import { useState } from "react";
-import { myPageDummyPosts } from "../../../../data/MyPageDummyPosts";
+import { useState, useMemo, useEffect } from "react";
 import { Search } from "lucide-react";
+import { useUserStore } from "../../../../stores/useUserStore";
+import { useMyPagePosts } from "../../../../hooks/useMyPagePosts";
 
 const postsPerPage = 6;
 
@@ -10,20 +11,68 @@ export default function MyPageSearchResult() {
   const { username } = useParams<{ username: string }>();
   const keyword = params.get("keyword")?.toLowerCase() ?? "";
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortOption, setSortOption] = useState<"latest" | "oldest">("latest");
+  const [selectedCategory, setSelectedCategory] = useState("");
 
-  const filteredPosts = myPageDummyPosts
-    .filter(
-      (post) =>
-        post.title.toLowerCase().includes(keyword) ||
-        post.content.toLowerCase().includes(keyword)
-    )
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const user = useUserStore((state) => state.user);
+  const { posts, loading } = useMyPagePosts(user?.uid || "");
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [keyword, sortOption, selectedCategory]);
+
+  const categoryOptions = user?.categoryLabels
+    ? Object.entries(user.categoryLabels).map(([key, label]) => ({
+        value: key,
+        label,
+      }))
+    : [];
+
+  const filteredPosts = useMemo(() => {
+    let list = posts;
+
+    if (selectedCategory) {
+      list = list.filter((p) => p.category === selectedCategory);
+    }
+
+    if (keyword) {
+      list = list.filter(
+        (post) =>
+          post.title.toLowerCase().includes(keyword) ||
+          post.content.toLowerCase().includes(keyword)
+      );
+    }
+
+    list = [...list].sort((a, b) => {
+      const timeA = a.createdAt?.toMillis() || 0;
+      const timeB = b.createdAt?.toMillis() || 0;
+      return sortOption === "latest" ? timeB - timeA : timeA - timeB;
+    });
+
+    return list;
+  }, [posts, keyword, selectedCategory, sortOption]);
 
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-  const currentPosts = filteredPosts.slice(
-    (currentPage - 1) * postsPerPage,
-    currentPage * postsPerPage
-  );
+  const currentPosts = filteredPosts
+    .slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage)
+    .map((post) => ({
+      ...post,
+      date: post.createdAt?.toDate().toLocaleDateString("ko-KR") || "",
+    }));
+
+  const highlightKeyword = (text: string) => {
+    if (!keyword) return text;
+    const regex = new RegExp(`(${keyword})`, "gi");
+    return text.split(regex).map((part, i) =>
+      part.toLowerCase() === keyword ? (
+        <mark key={i} className="text-indigo-300 bg-transparent font-bold">
+          {part}
+        </mark>
+      ) : (
+        part
+      )
+    );
+  };
 
   const handlePrev = () => {
     if (currentPage > 1) setCurrentPage((p) => p - 1);
@@ -32,6 +81,14 @@ export default function MyPageSearchResult() {
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((p) => p + 1);
   };
+
+  if (!user?.uid) {
+    return (
+      <p className="text-sm text-gray-400 py-10 text-center">
+        유저 정보를 불러오는 중입니다...
+      </p>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -45,7 +102,31 @@ export default function MyPageSearchResult() {
         </span>
       </h2>
 
-      {currentPosts.length > 0 ? (
+      <div className="flex flex-wrap gap-4 items-center text-sm">
+        <select
+          value={sortOption}
+          onChange={(e) => setSortOption(e.target.value as "latest" | "oldest")}
+          className="select select-sm bg-[#1f2937] text-white border-white/10"
+        >
+          <option value="latest">최신순</option>
+          <option value="oldest">오래된순</option>
+        </select>
+
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="select select-sm bg-[#1f2937] text-white border-white/10"
+        >
+          <option value="">전체 카테고리</option>
+          {categoryOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {!loading && currentPosts.length > 0 ? (
         <ul className="space-y-3 text-sm text-gray-300">
           {currentPosts.map((post) => (
             <li key={post.id}>
@@ -53,7 +134,7 @@ export default function MyPageSearchResult() {
                 to={`/mypage/${username}/post/${post.id}`}
                 className="flex justify-between items-center p-3 rounded-lg bg-white/5 border border-white/10 hover:border-indigo-300 hover:text-indigo-300 transition"
               >
-                <span className="truncate">{post.title}</span>
+                <span className="truncate">{highlightKeyword(post.title)}</span>
                 <span className="ml-4 shrink-0 text-xs text-gray-400">
                   {post.date}
                 </span>
@@ -62,9 +143,11 @@ export default function MyPageSearchResult() {
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-gray-400">
-          검색 결과가 없습니다. 다른 키워드로 검색해보세요.
-        </p>
+        !loading && (
+          <p className="text-sm text-gray-400">
+            검색 결과가 없습니다. 다른 키워드로 검색해보세요.
+          </p>
+        )
       )}
 
       {totalPages > 1 && (
