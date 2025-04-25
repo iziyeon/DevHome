@@ -1,42 +1,28 @@
-// src/contexts/AuthObserver.tsx
-
 import { useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../firebase";
+import { auth } from "../firebase";
 import { useUserStore } from "../stores/useUserStore";
+import { getUserFromFirestore } from "../services/firestore/userService";
 
 export default function AuthObserver() {
   const setUser = useUserStore((state) => state.setUser);
-  const clearUser = useUserStore((state) => state.clearUser);
-  const setLoading = useUserStore((state) => state.setLoading);
+  const setIsLoading = useUserStore((state) => state.setIsLoading);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          setUser({
-            uid: user.uid,
-            name: userData.name,
-            nickname: userData.nickname,
-            email: userData.email,
-          });
-        } else {
-          clearUser();
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        setIsLoading(true);
+        const user = await getUserFromFirestore(firebaseUser.uid);
+        if (user) {
+          setUser(user);
         }
+        setIsLoading(false);
       } else {
-        clearUser();
+        setUser(null);
       }
-
-      setLoading(false);
     });
-
     return () => unsubscribe();
-  }, [setUser, clearUser, setLoading]);
+  }, [setUser, setIsLoading]);
 
   return null;
 }
