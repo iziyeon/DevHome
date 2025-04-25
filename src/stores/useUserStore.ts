@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { Timestamp } from "firebase/firestore";
 
 export interface UserInfo {
   uid: string;
@@ -49,8 +50,8 @@ export interface UserInfo {
   techStack?: {
     [category: string]: string[];
   };
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
 }
 
 interface UserStore {
