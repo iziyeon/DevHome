@@ -1,9 +1,10 @@
-// src/pages/PostWrite.tsx
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { FilePlus } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
 import { savePostToFirestore } from "../services/firestore/posts";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 const categoryOptions = [
   { value: "기능구현팁", label: "기능구현팁" },
@@ -28,8 +29,28 @@ export default function PostWrite() {
   const user = useUserStore((state) => state.user);
 
   useEffect(() => {
-    if (!isEditMode) return;
-    // TODO: 글 수정 시 Firestore에서 기존 데이터 불러오기 (아직은 dummy)
+    if (!isEditMode || !postId) return;
+
+    const fetchPost = async () => {
+      try {
+        const ref = doc(db, "communityPosts", postId);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          const data = snap.data();
+          setTitle(data.title || "");
+          setCategory(data.category || "");
+          setContent(data.content || "");
+        } else {
+          alert("존재하지 않는 게시글입니다.");
+          navigate("/community");
+        }
+      } catch (err) {
+        console.error("❌ 글 불러오기 실패:", err);
+        alert("글 정보를 불러오는 중 오류가 발생했습니다.");
+      }
+    };
+
+    fetchPost();
   }, [isEditMode, postId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
