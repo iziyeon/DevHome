@@ -1,29 +1,36 @@
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase";
-import { UserInfo } from "../../stores/useUserStore";
+import type { User } from "../../stores/useUserStore";
 
-export async function getUserFromFirestore(
-  uid: string
-): Promise<UserInfo | null> {
+export async function getUserFromFirestore(uid: string): Promise<User | null> {
   try {
-    const ref = doc(db, "users", uid);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return null;
-    return snap.data() as UserInfo;
-  } catch {
+    const userRef = doc(db, "users", uid);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      return {
+        uid,
+        name: userData.name || "",
+        nickname: userData.nickname || "",
+        email: userData.email || "",
+        bio: userData.bio,
+        profileImage: userData.profileImage,
+        position: userData.position,
+        intro: userData.intro,
+        snsLinks: userData.snsLinks,
+        snsLinksVisible: userData.snsLinksVisible,
+        categoryLabels: userData.categoryLabels,
+        techStack: userData.techStack,
+        projects: userData.projects,
+        experience: userData.experience,
+        education: userData.education,
+        links: userData.links,
+      };
+    }
     return null;
-  }
-}
-
-export async function saveUserToFirestore(user: UserInfo) {
-  try {
-    const ref = doc(db, "users", user.uid);
-    const payload = {
-      ...user,
-      updatedAt: new Date(),
-    };
-    await setDoc(ref, payload, { merge: true });
   } catch (error) {
-    console.error("❌ Firestore 유저 저장 실패:", error);
+    console.error("Error fetching user:", error);
+    return null;
   }
 }

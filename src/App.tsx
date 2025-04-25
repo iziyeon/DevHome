@@ -1,14 +1,14 @@
-import AuthObserver from "./contexts/AuthObserver";
 import Router from "./routes/Router";
-import { useUserStore } from "./stores/useUserStore";
+import { AuthProvider } from "./contexts/AuthContext";
+import AuthObserver from "./contexts/AuthObserver";
 
-export default function App() {
-  const isLoading = useUserStore((state) => state.isLoading);
-
+function App() {
   return (
-    <>
+    <AuthProvider>
       <AuthObserver />
-      {!isLoading && <Router />}
-    </>
+      <Router />
+    </AuthProvider>
   );
 }
+
+export default App;

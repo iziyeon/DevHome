@@ -97,13 +97,13 @@ export default function EditProfileInfoAndPhoto() {
               onChange={(e) => setPosition(e.target.value)}
               className="select select-bordered w-full bg-white/10 text-white border-white/10"
             >
-              <option className="text-black">프론트엔드</option>
-              <option className="text-black">백엔드</option>
-              <option className="text-black">풀스택</option>
-              <option className="text-black">모바일</option>
-              <option className="text-black">DevOps</option>
-              <option className="text-black">데이터</option>
-              <option className="text-black">기타</option>
+              <option className="bg-[#1f2937] text-white">프론트엔드</option>
+              <option className="bg-[#1f2937] text-white">백엔드</option>
+              <option className="bg-[#1f2937] text-white">풀스택</option>
+              <option className="bg-[#1f2937] text-white">모바일</option>
+              <option className="bg-[#1f2937] text-white">DevOps</option>
+              <option className="bg-[#1f2937] text-white">데이터</option>
+              <option className="bg-[#1f2937] text-white">기타</option>
             </select>
 
             {isCustom && (
