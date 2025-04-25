@@ -18,9 +18,7 @@ export default function ResumeProjectSection() {
             >
               <h3 className="text-lg font-bold">{p.title}</h3>
               <p className="text-white/70 mb-1">{p.description}</p>
-              <p className="text-white/60 text-sm mb-2">
-                [{p.stack?.join(", ")}]
-              </p>
+              <p className="text-white/60 text-sm mb-2">[{p.stack}]</p>
               <p className="text-white/80 mb-2">{p.role}</p>
               <div className="flex gap-4 text-sm">
                 {p.deployUrl && (

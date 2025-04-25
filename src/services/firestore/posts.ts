@@ -1,11 +1,11 @@
-import { db } from "../../firebase";
 import {
   collection,
   doc,
-  setDoc,
+  addDoc,
   updateDoc,
   serverTimestamp,
 } from "firebase/firestore";
+import { db } from "../../firebase";
 
 interface PostData {
   id?: string;
@@ -14,32 +14,46 @@ interface PostData {
   content: string;
   uid: string;
   nickname: string;
-  isMyPagePost?: boolean;
+  isMyPagePost: boolean;
 }
 
-export async function savePostToFirestore(post: PostData) {
-  const baseCollection = post.isMyPagePost ? "mypagePosts" : "communityPosts";
-  const postRef = post.id
-    ? doc(db, baseCollection, post.id)
-    : doc(collection(db, baseCollection));
+export async function savePostToFirestore(data: PostData): Promise<string> {
+  const { id, title, category, content, uid, nickname, isMyPagePost } = data;
+  const collectionName = isMyPagePost ? "mypagePosts" : "communityPosts";
 
-  const isEdit = Boolean(post.id);
+  try {
+    // 게시물 내용에 따른 추정 읽기 시간 계산
+    const words = content.trim().split(/\s+/).length;
+    const readTime = Math.ceil(words / 200) + "분 소요";
 
-  const payload = {
-    title: post.title,
-    category: post.category,
-    content: post.content,
-    uid: post.uid,
-    nickname: post.nickname,
-    updatedAt: serverTimestamp(),
-    ...(isEdit ? {} : { createdAt: serverTimestamp() }),
-  };
-
-  if (isEdit) {
-    await updateDoc(postRef, payload);
-  } else {
-    await setDoc(postRef, payload);
+    // 신규 게시물 작성
+    if (!id) {
+      const docRef = await addDoc(collection(db, collectionName), {
+        title,
+        category,
+        content,
+        uid,
+        nickname,
+        readTime,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      return docRef.id;
+    }
+    // 기존 게시물 수정
+    else {
+      const postRef = doc(db, collectionName, id);
+      await updateDoc(postRef, {
+        title,
+        category,
+        content,
+        readTime,
+        updatedAt: serverTimestamp(),
+      });
+      return id;
+    }
+  } catch (err) {
+    console.error("❌ 게시글 저장 실패:", err);
+    throw err;
   }
-
-  return postRef.id;
 }
