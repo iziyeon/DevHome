@@ -1,7 +1,8 @@
+// src/components/pages/community/CommunityPostDetail.tsx
 import { useNavigate, useParams } from "react-router-dom";
 import { PenLine, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { doc, getDoc, Timestamp } from "firebase/firestore";
+import { doc, getDoc, deleteDoc, Timestamp } from "firebase/firestore";
 import { db } from "../../../firebase";
 
 interface FirestorePost {
@@ -40,6 +41,19 @@ export default function CommunityPostDetail() {
     fetchPost();
   }, [id]);
 
+  const handleDelete = async () => {
+    if (!id) return;
+    const ok = confirm("정말로 삭제하시겠습니까?");
+    if (!ok) return;
+    try {
+      await deleteDoc(doc(db, "communityPosts", id));
+      navigate("/community");
+    } catch (error) {
+      console.error("❌ 삭제 실패:", error);
+      alert("삭제 중 오류가 발생했습니다.");
+    }
+  };
+
   if (loading) {
     return <div className="text-center text-white py-20">로딩 중...</div>;
   }
@@ -74,9 +88,7 @@ export default function CommunityPostDetail() {
           수정
         </button>
         <button
-          onClick={() => {
-            if (confirm("정말로 삭제하시겠습니까?")) navigate("/community");
-          }}
+          onClick={handleDelete}
           className="btn btn-outline btn-sm border-white/20 text-white hover:border-red-400 hover:text-red-400 transition inline-flex items-center gap-1"
         >
           <Trash2 size={16} />
