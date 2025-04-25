@@ -1,18 +1,24 @@
 import { ExternalLink } from "lucide-react";
+import { useUserStore } from "../../../../stores/useUserStore";
 
-export type QuickLink = {
-  id: string;
-  label: string;
-  url: string;
-  author: string;
-};
+export default function MyQuickLinksPanel() {
+  const user = useUserStore((state) => state.user);
+  const snsLinks = user?.snsLinks || {};
+  const snsLinksVisible = user?.snsLinksVisible || {};
 
-interface MyQuickLinksPanelProps {
-  links: QuickLink[];
-}
+  const validLinks = Object.entries(snsLinks)
+    .filter(([key, url]) => {
+      const isVisible = snsLinksVisible[key];
+      const hasUrl = url?.trim();
+      return hasUrl && isVisible !== false; // ❗️undefined는 true로 간주
+    })
+    .map(([key, url]) => ({
+      id: key,
+      label: key,
+      url: url!,
+    }));
 
-export default function MyQuickLinksPanel({ links }: MyQuickLinksPanelProps) {
-  if (!links.length) return null;
+  if (validLinks.length === 0) return null;
 
   return (
     <section className="space-y-4 animate-fade-in">
@@ -22,7 +28,7 @@ export default function MyQuickLinksPanel({ links }: MyQuickLinksPanelProps) {
       </h3>
 
       <ul className="grid sm:grid-cols-2 gap-4">
-        {links.map((link) => (
+        {validLinks.map((link) => (
           <li
             key={link.id}
             className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white shadow-sm backdrop-blur-sm"

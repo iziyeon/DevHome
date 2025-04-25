@@ -4,30 +4,26 @@ import MyIntroBanner from "./MyIntroBanner";
 import MyPostList from "./MyPostList";
 import MyGuestbookList from "../guestbook/MyGuestbookList";
 import MyQuickLinksPanel from "../quicklinks/MyQuickLinksPanel";
-import type { QuickLink } from "../quicklinks/MyQuickLinksPanel";
 import { useUserStore } from "../../../../stores/useUserStore";
 import { useMyPagePosts } from "../../../../hooks/useMyPagePosts";
 import { useMemo } from "react";
 
 interface OutletContext {
   username: string;
-  quickLinks: QuickLink[];
 }
 
 export default function MyPageHome() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { quickLinks, username } = useOutletContext<OutletContext>();
+  const { username } = useOutletContext<OutletContext>();
   const user = useUserStore((state) => state.user);
   const intro = user?.intro;
 
   const searchParam = new URLSearchParams(location.search).get("search");
-
-  // 🔥 uid가 없는 경우엔 쿼리 실행 안 함
   const { posts, loading } = useMyPagePosts(user?.uid || "");
 
   const filteredPosts = useMemo(() => {
-    if (!user?.uid) return []; // 🔒 uid 없으면 빈 배열 반환
+    if (!user?.uid) return [];
     const keyword = searchParam?.toLowerCase() || "";
     return posts
       .filter((post) => {
@@ -83,7 +79,7 @@ export default function MyPageHome() {
 
       <MyGuestbookList username={username} />
 
-      <MyQuickLinksPanel links={quickLinks} />
+      <MyQuickLinksPanel />
     </div>
   );
 }

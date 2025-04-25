@@ -1,27 +1,72 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  collection,
+  query,
+  orderBy,
+  limit,
+  addDoc,
+  getDocs,
+  Timestamp,
+} from "firebase/firestore";
+import { db } from "../../../../firebase";
+import { useUserStore } from "../../../../stores/useUserStore";
 import { MessageSquare } from "lucide-react";
 
 interface MyGuestbookListProps {
   username: string;
 }
 
-const dummyGuestbook = [
-  { id: "1", from: "방문자A", message: "홈이 너무 멋져요!" },
-  { id: "2", from: "방문자B", message: "이력서 잘 봤습니다!" },
-];
+interface GuestbookEntry {
+  id: string;
+  fromUid: string;
+  fromNickname: string;
+  content: string;
+  createdAt: Timestamp;
+}
 
 export default function MyGuestbookList({ username }: MyGuestbookListProps) {
-  const [guestbook, setGuestbook] = useState(dummyGuestbook);
+  const user = useUserStore((state) => state.user);
+  const [guestbook, setGuestbook] = useState<GuestbookEntry[]>([]);
   const [message, setMessage] = useState("");
+  const isLoggedIn = !!user;
 
-  const isLoggedIn = true;
-  const displayName = "홍길동";
+  const toUid = user?.uid || "";
 
-  const handleSubmit = () => {
-    if (!message.trim()) return;
-    setGuestbook([
-      ...guestbook,
-      { id: Date.now().toString(), from: displayName, message },
+  useEffect(() => {
+    const fetch = async () => {
+      if (!toUid) return;
+      const ref = collection(db, `guestbooks/${toUid}/entries`);
+      const q = query(ref, orderBy("createdAt", "desc"), limit(3));
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Omit<GuestbookEntry, "id">),
+      }));
+      setGuestbook(data);
+    };
+    fetch();
+  }, [toUid]);
+
+  const handleSubmit = async () => {
+    if (!message.trim() || !user?.uid || !user.nickname) return;
+
+    const entry = {
+      fromUid: user.uid,
+      fromNickname: user.nickname,
+      content: message,
+      createdAt: new Date(),
+    };
+
+    const ref = collection(db, `guestbooks/${toUid}/entries`);
+    const docRef = await addDoc(ref, entry);
+
+    setGuestbook((prev) => [
+      {
+        id: docRef.id,
+        ...entry,
+        createdAt: Timestamp.fromDate(entry.createdAt),
+      },
+      ...prev.slice(0, 2), // 최대 3개 유지
     ]);
     setMessage("");
   };
@@ -37,7 +82,9 @@ export default function MyGuestbookList({ username }: MyGuestbookListProps) {
         <div className="space-y-2 rounded-xl border border-white/10 bg-white/5 p-4 shadow-sm backdrop-blur-sm">
           <p className="text-sm text-gray-300">
             작성자:{" "}
-            <span className="font-semibold text-white">{displayName}</span>
+            <span className="font-semibold text-white">
+              {user.nickname || "익명"}
+            </span>
           </p>
           <textarea
             value={message}
@@ -62,8 +109,13 @@ export default function MyGuestbookList({ username }: MyGuestbookListProps) {
             key={entry.id}
             className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white shadow-sm backdrop-blur-sm"
           >
-            <p className="font-semibold text-indigo-300 mb-1">{entry.from}</p>
-            <p className="whitespace-pre-wrap">{entry.message}</p>
+            <p className="font-semibold text-indigo-300 mb-1">
+              {entry.fromNickname}
+            </p>
+            <p className="whitespace-pre-wrap">{entry.content}</p>
+            <p className="text-xs text-gray-400 mt-2">
+              {entry.createdAt.toDate().toLocaleDateString("ko-KR")}
+            </p>
           </li>
         ))}
       </ul>

@@ -1,56 +1,85 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  collection,
+  query,
+  orderBy,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  updateDoc,
+  doc,
+} from "firebase/firestore";
+import { db } from "../../../../firebase";
+import { useUserStore } from "../../../../stores/useUserStore";
 import { MessageCircle } from "lucide-react";
-
-const isLoggedIn = true;
-const currentUserNickname = "yeon";
 
 interface GuestbookEntry {
   id: string;
-  author: string;
+  fromUid: string;
+  fromNickname: string;
   content: string;
-  date: string;
+  createdAt: Date;
 }
 
 export default function MyPageGuestbook() {
-  const [entries, setEntries] = useState<GuestbookEntry[]>([
-    {
-      id: "g1",
-      author: "guest123",
-      content: "안녕하세요! DevHome 너무 멋져요 ✨",
-      date: "2025.04.17",
-    },
-    {
-      id: "g2",
-      author: "yeon",
-      content: "오늘도 기록 시작합니다 :)",
-      date: "2025.04.18",
-    },
-  ]);
-
+  const user = useUserStore((state) => state.user);
+  const [entries, setEntries] = useState<GuestbookEntry[]>([]);
   const [newEntry, setNewEntry] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const toUid = user?.uid || ""; // 현재 로그인한 사용자의 마이페이지
+
+  useEffect(() => {
+    const fetch = async () => {
+      if (!toUid) return;
+      const q = query(
+        collection(db, `guestbooks/${toUid}/entries`),
+        orderBy("createdAt", "desc")
+      );
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt.toDate(),
+      })) as GuestbookEntry[];
+      setEntries(data);
+      setLoading(false);
+    };
+    fetch();
+  }, [toUid]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEntry.trim()) return;
+    if (!user?.uid || !newEntry.trim()) return;
+
+    const ref = collection(db, `guestbooks/${toUid}/entries`);
+    const newDoc = await addDoc(ref, {
+      fromUid: user.uid,
+      fromNickname: user.nickname || "익명",
+      content: newEntry,
+      createdAt: new Date(),
+    });
 
     setEntries([
-      ...entries,
       {
-        id: Date.now().toString(),
-        author: currentUserNickname,
+        id: newDoc.id,
+        fromUid: user.uid,
+        fromNickname: user.nickname || "익명",
         content: newEntry,
-        date: new Date().toISOString().slice(0, 10),
+        createdAt: new Date(),
       },
+      ...entries,
     ]);
     setNewEntry("");
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("정말로 삭제하시겠습니까?")) {
-      setEntries(entries.filter((entry) => entry.id !== id));
-    }
+  const handleDelete = async (id: string) => {
+    if (!user?.uid || !confirm("정말로 삭제하시겠습니까?")) return;
+
+    await deleteDoc(doc(db, `guestbooks/${toUid}/entries`, id));
+    setEntries(entries.filter((e) => e.id !== id));
   };
 
   const handleEditStart = (entry: GuestbookEntry) => {
@@ -58,7 +87,11 @@ export default function MyPageGuestbook() {
     setEditText(entry.content);
   };
 
-  const handleEditSave = () => {
+  const handleEditSave = async () => {
+    if (!user?.uid || !editingId) return;
+
+    const ref = doc(db, `guestbooks/${toUid}/entries`, editingId);
+    await updateDoc(ref, { content: editText });
     setEntries(
       entries.map((e) => (e.id === editingId ? { ...e, content: editText } : e))
     );
@@ -73,58 +106,64 @@ export default function MyPageGuestbook() {
         방명록
       </h2>
 
-      <ul className="space-y-4">
-        {entries.map((item) => (
-          <li
-            key={item.id}
-            className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white shadow-sm backdrop-blur-sm"
-          >
-            <div className="flex items-start justify-between">
-              <span className="font-semibold text-indigo-300">
-                {item.author}
-              </span>
-              {item.author === currentUserNickname && (
-                <div className="flex gap-2">
-                  {editingId === item.id ? (
+      {loading ? (
+        <p className="text-sm text-gray-400">로딩 중...</p>
+      ) : (
+        <ul className="space-y-4">
+          {entries.map((item) => (
+            <li
+              key={item.id}
+              className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white shadow-sm backdrop-blur-sm"
+            >
+              <div className="flex items-start justify-between">
+                <span className="font-semibold text-indigo-300">
+                  {item.fromNickname}
+                </span>
+                {item.fromUid === user?.uid && (
+                  <div className="flex gap-2">
+                    {editingId === item.id ? (
+                      <button
+                        onClick={handleEditSave}
+                        className="btn btn-outline btn-xs text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300"
+                      >
+                        저장
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleEditStart(item)}
+                        className="btn btn-outline btn-xs text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300"
+                      >
+                        수정
+                      </button>
+                    )}
                     <button
-                      onClick={handleEditSave}
-                      className="btn btn-outline btn-xs text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300 transition"
+                      onClick={() => handleDelete(item.id)}
+                      className="btn btn-outline btn-xs text-white border-white/20 hover:text-red-400 hover:border-red-400"
                     >
-                      저장
+                      삭제
                     </button>
-                  ) : (
-                    <button
-                      onClick={() => handleEditStart(item)}
-                      className="btn btn-outline btn-xs text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300 transition"
-                    >
-                      수정
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    className="btn btn-outline btn-xs text-white border-white/20 hover:text-red-400 hover:border-red-400 transition"
-                  >
-                    삭제
-                  </button>
-                </div>
+                  </div>
+                )}
+              </div>
+
+              {editingId === item.id ? (
+                <textarea
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  className="mt-2 w-full rounded px-2 py-1 text-sm text-white bg-[#1f2937] border border-white/10"
+                />
+              ) : (
+                <p className="mt-2 whitespace-pre-wrap">{item.content}</p>
               )}
-            </div>
+              <div className="mt-2 text-xs text-gray-400">
+                {item.createdAt.toLocaleDateString("ko-KR")}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
 
-            {editingId === item.id ? (
-              <textarea
-                value={editText}
-                onChange={(e) => setEditText(e.target.value)}
-                className="mt-2 w-full rounded px-2 py-1 text-sm text-white bg-[#1f2937] border border-white/10"
-              />
-            ) : (
-              <p className="mt-2 whitespace-pre-wrap">{item.content}</p>
-            )}
-            <div className="mt-2 text-xs text-gray-400">{item.date}</div>
-          </li>
-        ))}
-      </ul>
-
-      {isLoggedIn ? (
+      {user ? (
         <form onSubmit={handleSubmit} className="space-y-2">
           <textarea
             value={newEntry}
@@ -136,7 +175,7 @@ export default function MyPageGuestbook() {
           <div className="text-right">
             <button
               type="submit"
-              className="btn btn-outline btn-sm text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300 transition"
+              className="btn btn-outline btn-sm text-white border-white/20 hover:text-indigo-300 hover:border-indigo-300"
             >
               등록
             </button>
