@@ -1,21 +1,17 @@
 import { create } from "zustand";
-import { Timestamp } from "firebase/firestore";
 
-export interface UserInfo {
+export interface User {
   uid: string;
-  email: string;
   name: string;
   nickname: string;
+  email: string;
+  bio?: string;
   profileImage?: string;
   position?: string;
-  bio?: string;
   intro?: {
     interest?: string;
     book?: string;
     goal?: string;
-  };
-  categoryLabels?: {
-    [key: string]: string;
   };
   snsLinks?: {
     github?: string;
@@ -24,49 +20,52 @@ export interface UserInfo {
     instagram?: string;
     x?: string;
   };
-  snsLinksVisible?: { [key: string]: boolean };
-  experience?: {
+  snsLinksVisible?: {
+    [key: string]: boolean;
+  };
+  categoryLabels?: {
+    [key: string]: string;
+  };
+  techStack?: {
+    [key: string]: string[];
+  };
+  projects?: Array<{
+    title: string;
+    description: string;
+    stack: string;
+    role: string;
+    deployUrl?: string;
+    githubUrl?: string;
+  }>;
+  experience?: Array<{
     company: string;
     position: string;
     period: string;
     description: string;
-  }[];
-  education?: {
+  }>;
+  education?: Array<{
     title: string;
     org: string;
     period: string;
-  }[];
-  links?: {
+  }>;
+  links?: Array<{
     label: string;
     url: string;
-  }[];
-  projects?: {
-    title: string;
-    description: string;
-    stack: string[];
-    role: string;
-    deployUrl?: string;
-    githubUrl?: string;
-  }[];
-  techStack?: {
-    [category: string]: string[];
-  };
-  createdAt?: Timestamp;
-  updatedAt?: Timestamp;
+  }>;
 }
 
-interface UserStore {
-  user: UserInfo | null;
+interface UserState {
+  user: User | null;
   isLoading: boolean;
-  setUser: (user: UserInfo | null) => void;
+  setUser: (user: User | null) => void;
   clearUser: () => void;
-  setIsLoading: (loading: boolean) => void;
+  setIsLoading: (isLoading: boolean) => void;
 }
 
-export const useUserStore = create<UserStore>((set) => ({
+export const useUserStore = create<UserState>((set) => ({
   user: null,
-  isLoading: false,
+  isLoading: true,
   setUser: (user) => set({ user }),
   clearUser: () => set({ user: null }),
-  setIsLoading: (loading) => set({ isLoading: loading }),
+  setIsLoading: (isLoading) => set({ isLoading }),
 }));
